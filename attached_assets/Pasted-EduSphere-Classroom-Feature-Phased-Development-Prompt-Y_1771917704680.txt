@@ -1,0 +1,474 @@
+EduSphere Classroom Feature – Phased Development Prompt
+You are an expert full‑stack developer. I am building EduSphere, a unified educational platform. We are starting with the Classroom Feature – the core LMS module. I need you to generate the complete, production‑ready code for this feature, following a phased approach.
+
+Below you will find the Phase 1 requirements (MVP). After I review the generated code, I will provide the requirements for Phase 2, then Phase 3, and finally Phase 4.
+
+Technology Stack (for all phases)
+Layer	Technology
+Frontend	React (Vite) + Tailwind CSS + Shadcn/ui
+Real‑time	WebSockets (Socket.io)
+Backend	Node.js + Express + TypeScript
+Database	PostgreSQL (relational) + Redis (caching/state)
+File Storage	AWS S3 / Cloudinary (for images, PDFs)
+Authentication	JWT + bcrypt
+AI Services	OpenAI / Gemini API (to be added in later phases)
+Deployment	Docker + Kubernetes (planned, not needed now)
+Project Structure
+Please create a monorepo with the following folders:
+
+text
+edusphere/
+├── server/          # Node.js + Express backend
+│   ├── src/
+│   │   ├── config/          # DB, Redis, env
+│   │   ├── controllers/      # route handlers
+│   │   ├── middleware/       # auth, error handling
+│   │   ├── models/           # database models (raw SQL queries or an ORM – you can use Prisma or Knex, but I prefer raw SQL for clarity)
+│   │   ├── routes/           # express routes
+│   │   ├── services/         # business logic (optional)
+│   │   ├── utils/            # helpers, validators
+│   │   ├── websocket/        # Socket.io setup and handlers
+│   │   └── app.js            # express app
+│   ├── .env.example
+│   └── package.json
+├── client/          # React + Vite frontend
+│   ├── public/
+│   ├── src/
+│   │   ├── components/       # reusable UI components
+│   │   ├── pages/            # page-level components
+│   │   ├── hooks/            # custom hooks (auth, socket, etc.)
+│   │   ├── context/          # React context (auth, notifications)
+│   │   ├── services/         # API calls (axios)
+│   │   ├── utils/            # helpers
+│   │   └── App.jsx
+│   └── package.json
+└── docker-compose.yml (optional, for local development with Postgres + Redis)
+Development Conventions
+Use ES modules (import/export).
+
+Use environment variables for secrets (database URL, JWT secret, AWS keys, etc.).
+
+Implement error handling with try/catch and return appropriate HTTP status codes.
+
+Validate all inputs using Zod (or Joi).
+
+Write clean, commented code.
+
+Follow RESTful conventions for API endpoints.
+
+Use Socket.io for real‑time features.
+
+For database, use raw SQL with parameterized queries (or you may use an ORM like Prisma if you prefer – but provide the schema and migration scripts).
+
+For file uploads, use Multer and upload to AWS S3 (or Cloudinary). Include environment variables for bucket credentials.
+
+For authentication, use JWT stored in httpOnly cookies (or localStorage – decide and document). Include middleware to protect routes based on roles.
+
+Now, let's proceed with Phase 1 requirements.
+
+Phase 1 – Foundation & Core Classroom (MVP)
+Goals
+User authentication with roles (Teacher, Student).
+
+Teachers can create classes, students can join via class code.
+
+Stream tab: real‑time discussion with posts, comments, reactions.
+
+Classwork tab: topics, resource uploads, assignments with submissions.
+
+People tab: roster, invites.
+
+Attendance module: mark and view attendance.
+
+Basic gradebook: teachers can grade submissions.
+
+In‑app notifications for key events.
+
+Detailed Feature List
+1. User Authentication & Role‑Based Access Control (RBAC)
+Roles: super_admin, teacher, student. (Parent will be added in Phase 2.)
+
+Registration: email, password, name, role (only teacher/student for now). For simplicity, we may not allow public registration for teachers – they could be created by a super admin, but for MVP allow any user to register as teacher or student (we'll add restrictions later). Include a checkbox for "I am a teacher".
+
+Login: email + password, return JWT.
+
+Profile: user can view and edit basic info (name, avatar). Avatar upload to S3.
+
+2. Class Management
+Create Class (teacher only): name, subject, grade, description. System generates a unique class code (e.g., random 6‑character alphanumeric).
+
+Join Class (student only): enter class code to enroll.
+
+Each class has a unique ID and a dashboard.
+
+3. Stream Tab (Real‑time Discussion)
+Posts: Teachers can create text posts (announcements) with optional file attachments (upload to S3). Posts belong to a class.
+
+Comments: Any class member can comment on posts (threaded – support replies). Comments are real‑time via WebSockets.
+
+Reactions: Users can react to posts and comments with emojis (👍, ❤️, 😕, etc.). One reaction per user per target per emoji (toggle on/off).
+
+Pinned Posts: Teachers can pin/unpin posts. Pinned posts appear at the top.
+
+Real‑time updates: When a new post/comment/reaction is created, all users in that class should see it instantly (using Socket.io rooms).
+
+4. Classwork Tab (Resource & Assignment Hub)
+Topics: Teachers can create topics (folders) to organize content (e.g., "Chapter 1", "Homework"). Topics have a position order.
+
+Resources: Teachers can upload files (PDF, images, videos) to a topic. Each resource has a title (optional, defaults to filename), file URL, and file type.
+
+Assignments:
+
+Teachers can create assignments under a topic (or no topic). Fields: title, instructions (rich text optional), due date, max points, optional attachments.
+
+Students can submit: either text response or file upload (or both). Allow multiple submission attempts? For MVP, one submission per student, but allow resubmission until due date? Let's allow updates until due date.
+
+Teachers can view all submissions for an assignment, enter a grade (decimal) and feedback. Grades are stored.
+
+Submissions are timestamped.
+
+5. People Tab
+Roster: List all students and teachers in the class. Show role, join date.
+
+Invites: Teacher can copy class code to share. Optionally send email invites (for MVP, just display the code; we can add email later).
+
+Teacher can remove a student from the class.
+
+6. Attendance Module
+Mark Attendance: Teacher selects a date and marks each student as present/absent/late. For MVP, a simple list with checkboxes.
+
+View Attendance: Students can see their own attendance record (list of dates with status). Teachers can view full class attendance for a date range.
+
+7. In‑app Notifications
+Users receive notifications for:
+
+New post in a class they are in.
+
+New comment on their post or comment they participated in.
+
+Assignment created (for students in that class).
+
+Grade published (for the student).
+
+Notifications have type, reference ID (e.g., post ID), content preview, read/unread status.
+
+API to fetch notifications and mark as read.
+
+Database Schema (PostgreSQL)
+Please create the following tables. Use UUID for primary keys. Provide SQL migration scripts.
+
+sql
+-- Users
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('super_admin', 'teacher', 'student')),
+  avatar_url TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Classes
+CREATE TABLE classes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  subject TEXT,
+  grade TEXT,
+  description TEXT,
+  class_code TEXT UNIQUE NOT NULL,
+  teacher_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enrollments
+CREATE TABLE enrollments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  joined_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(class_id, student_id)
+);
+
+-- Posts
+CREATE TABLE posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  is_pinned BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Post attachments (files)
+CREATE TABLE post_attachments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  file_url TEXT NOT NULL,
+  file_type TEXT, -- e.g., 'image/png', 'application/pdf'
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Comments
+CREATE TABLE comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID NOT NULL REFERENCES posts(id) ON DELETE CASCADE,
+  author_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE
+);
+
+-- Reactions
+CREATE TABLE reactions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE,
+  comment_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+  emoji TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT reaction_target_check CHECK (
+    (post_id IS NOT NULL AND comment_id IS NULL) OR
+    (post_id IS NULL AND comment_id IS NOT NULL)
+  ),
+  UNIQUE(user_id, post_id, comment_id, emoji)
+);
+
+-- Topics
+CREATE TABLE topics (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  position INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Resources
+CREATE TABLE resources (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  topic_id UUID NOT NULL REFERENCES topics(id) ON DELETE CASCADE,
+  uploader_id UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+  title TEXT,
+  file_url TEXT NOT NULL,
+  file_type TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Assignments
+CREATE TABLE assignments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  topic_id UUID REFERENCES topics(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  instructions TEXT,
+  due_date TIMESTAMP WITH TIME ZONE,
+  max_points INTEGER,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  created_by UUID REFERENCES users(id) ON DELETE SET NULL
+);
+
+-- Assignment attachments (optional files for the assignment description)
+CREATE TABLE assignment_attachments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  assignment_id UUID NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
+  file_url TEXT NOT NULL,
+  file_type TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Submissions
+CREATE TABLE submissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  assignment_id UUID NOT NULL REFERENCES assignments(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT, -- text submission
+  file_url TEXT, -- file submission (if any)
+  submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  grade DECIMAL(5,2),
+  feedback TEXT,
+  graded_at TIMESTAMP WITH TIME ZONE,
+  UNIQUE(assignment_id, student_id)
+);
+
+-- Attendance
+CREATE TABLE attendance (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  status TEXT NOT NULL CHECK (status IN ('present', 'absent', 'late')),
+  marked_by UUID NOT NULL REFERENCES users(id) ON DELETE SET NULL,
+  marked_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(class_id, student_id, date)
+);
+
+-- Notifications
+CREATE TABLE notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  type TEXT NOT NULL, -- e.g., 'new_post', 'new_comment', 'assignment_created', 'grade_published'
+  reference_id UUID, -- id of the related entity (post, comment, assignment, etc.)
+  content TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+Redis Usage
+Use Redis to manage Socket.io rooms and for optional caching.
+
+For Phase 1, we mainly need Socket.io with Redis adapter if we scale horizontally, but for local development we can start without. Include Redis config for future.
+
+API Endpoints (REST)
+Base URL: /api/v1
+
+Authentication
+
+Method	Endpoint	Description	Auth
+POST	/auth/register	Register user (role = teacher/student)	Public
+POST	/auth/login	Login, return JWT	Public
+GET	/auth/profile	Get current user profile	User
+PATCH	/auth/profile	Update profile (name, avatar)	User
+Classes
+
+Method	Endpoint	Description	Auth
+GET	/classes	List classes user is enrolled in/teaching	User
+POST	/classes	Create a new class (teacher only)	Teacher
+GET	/classes/:id	Get class details	Enrolled user
+POST	/classes/:id/join	Student join class with code	Student
+DELETE	/classes/:id/students/:userId	Remove student from class (teacher)	Teacher
+Stream
+
+Method	Endpoint	Description	Auth
+GET	/classes/:id/posts	List posts (paginated, newest first)	Enrolled user
+POST	/classes/:id/posts	Create a new post (teacher only)	Teacher
+PATCH	/posts/:id/pin	Pin/unpin a post (teacher)	Teacher
+DELETE	/posts/:id	Delete a post (teacher only)	Teacher
+GET	/posts/:id/comments	List comments for a post (threaded)	Enrolled user
+POST	/posts/:id/comments	Add a comment (any member)	Enrolled user
+PUT	/comments/:id	Update a comment (owner only)	Owner
+DELETE	/comments/:id	Delete a comment (owner/teacher)	Owner/Teacher
+POST	/posts/:id/reactions	Add/update reaction (toggle)	Enrolled user
+DELETE	/posts/:id/reactions?emoji=👍	Remove reaction	Owner
+POST	/comments/:id/reactions	Similarly for comments	Enrolled user
+Classwork – Topics
+
+Method	Endpoint	Description	Auth
+GET	/classes/:id/topics	List topics (ordered by position)	Enrolled user
+POST	/classes/:id/topics	Create a topic (teacher)	Teacher
+PATCH	/topics/:id	Update topic name, position	Teacher
+DELETE	/topics/:id	Delete topic (teacher)	Teacher
+Resources
+
+Method	Endpoint	Description	Auth
+GET	/topics/:id/resources	List resources in a topic	Enrolled user
+POST	/topics/:id/resources	Upload a resource (teacher)	Teacher
+DELETE	/resources/:id	Delete resource (teacher)	Teacher
+Assignments
+
+Method	Endpoint	Description	Auth
+GET	/classes/:id/assignments	List assignments (with optional topic filter)	Enrolled user
+POST	/classes/:id/assignments	Create assignment (teacher)	Teacher
+GET	/assignments/:id	Get assignment details	Enrolled user
+PATCH	/assignments/:id	Update assignment (teacher)	Teacher
+DELETE	/assignments/:id	Delete assignment (teacher)	Teacher
+POST	/assignments/:id/submit	Submit assignment (student)	Student (enrolled)
+GET	/assignments/:id/submissions	List all submissions (teacher)	Teacher
+GET	/assignments/:id/my-submission	Get own submission (student)	Student
+POST	/submissions/:id/grade	Grade a submission (teacher)	Teacher
+People
+
+Method	Endpoint	Description	Auth
+GET	/classes/:id/people	List all members with roles	Enrolled user
+GET	/classes/:id/students	List only students	Enrolled user
+Attendance
+
+Method	Endpoint	Description	Auth
+GET	/classes/:id/attendance	List attendance records (filter by date)	Teacher
+POST	/classes/:id/attendance	Mark attendance for a date (teacher)	Teacher
+GET	/attendance/me	Get current user's attendance across classes (student)	Student
+Notifications
+
+Method	Endpoint	Description	Auth
+GET	/notifications	List user notifications (paginated)	User
+PATCH	/notifications/:id/read	Mark as read	User
+PATCH	/notifications/read-all	Mark all as read	User
+WebSocket Events (Socket.io)
+Connection: authenticate using JWT token (sent as query param or auth handshake).
+
+After connection, client can join a class room: join_class (with classId).
+
+When a new post is created, server emits new_post to the class room with the post data.
+
+When a new comment is created, server emits new_comment to the post room (or class room). We'll emit to the post room (clients who are viewing that post). Alternatively, we can emit to class room and let client filter. For simplicity, emit to class room with a type field indicating it's a comment and the post ID.
+
+When a reaction is added/removed, emit reaction_updated to class room.
+
+Define the event payloads clearly.
+
+Frontend Components (React)
+Create the following pages and components:
+
+Auth pages: Login, Register.
+
+Dashboard: After login, user sees list of their classes. Click to enter a class.
+
+Class Layout: A component with tabs (Stream, Classwork, People, Grades, Attendance). Use React Router for nested routes.
+
+Stream Tab:
+
+PostComposer: text input, file upload, submit button.
+
+PostList: renders list of PostItem components.
+
+PostItem: shows author, time, content, attachments, reactions, comment count. Expand to show comments.
+
+CommentSection: list of comments (threaded), with CommentComposer.
+
+ReactionBar: buttons for emojis, shows current user's reaction and counts.
+
+Real‑time updates: use Socket.io to listen for new posts/comments/reactions and update the list accordingly.
+
+Classwork Tab:
+
+Left sidebar: list of topics (draggable? not now, just list).
+
+Main area: when topic selected, show resources and assignments under that topic.
+
+Teacher: buttons to add topic, upload resource, create assignment.
+
+Student: view resources, see assignments with due dates, submit button.
+
+People Tab: simple table of members, with role badges. Teacher sees invite code and remove buttons.
+
+Grades Tab (teacher): list of assignments with average grade, and a table of students with grades per assignment (like a spreadsheet). Student: view own grades per assignment.
+
+Attendance Tab: teacher sees a date picker and list of students with checkboxes; student sees a calendar view of their attendance.
+
+Notifications: a bell icon in header showing unread count; dropdown with notifications; click to mark read.
+
+Use React Context for:
+
+Auth state (user, login, logout).
+
+Socket connection (provide socket instance).
+
+Notifications (unread count, list).
+
+Use Tailwind CSS for styling. Use Shadcn/ui components (or similar) for buttons, modals, etc. If you prefer to build from scratch, that's fine, but ensure a clean, responsive design.
+
+Non‑functional Requirements
+Security: JWT stored in httpOnly cookie for better security. Implement CSRF protection if needed. For simplicity, you may store in localStorage but document the trade‑off.
+
+Input validation: Use Zod to validate request bodies.
+
+Error handling: Return consistent error responses: { success: false, error: string }. Use HTTP status codes appropriately.
+
+File uploads: Use Multer, upload to AWS S3. Provide a service that handles uploads and returns the URL. Limit file size to 10MB, allow only certain types (images, PDF, DOC, PPT, etc.).
+
+Real‑time: Socket.io with authentication middleware. Use rooms for each class.
+
+Database: Use connection pooling. Provide a migration script (e.g., using pg or a migration tool like node-pg-migrate).
+
+Environment variables: Create a .env.example with all required variables.
+
