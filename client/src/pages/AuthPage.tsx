@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,14 @@ import { BookOpen } from "lucide-react";
 export default function AuthPage() {
   const [, setLocation] = useLocation();
   const { login, register, isLoggingIn, isRegistering, user } = useAuth();
-  
-  if (user) {
-    setLocation("/");
-    return null;
-  }
-
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [registerData, setRegisterData] = useState({ name: "", email: "", password: "", role: "student" });
+
+  useEffect(() => {
+    if (user) setLocation("/");
+  }, [user, setLocation]);
+
+  if (user) return null;
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
