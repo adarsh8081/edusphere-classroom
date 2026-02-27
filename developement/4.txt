@@ -1,0 +1,420 @@
+EduSphere Classroom Feature – Phase 4 Development Prompt
+Phase 4 Overview: The Intelligent Classroom Companion
+Phase 4 transforms EduSphere from an AI‑enhanced platform into a truly intelligent, adaptive, and immersive learning environment. This phase focuses on creating a 24/7 AI teaching assistant, personalized learning paths, advanced content creation, voice interaction, and preparing the platform for seamless integration with upcoming modules (Quiz Portal, Coding IDE, Career Engine).
+
+Phase 4 Goals
+Intelligent Teaching Assistant Bot – A 24/7 contextual chatbot for each class.
+
+Personalized Learning Paths – AI‑driven custom learning journeys for every student.
+
+Advanced Content Creation Suite – Generate complete units, interactive content, and assessments.
+
+Voice & Accessibility Features – Voice commands, text‑to‑speech, and multi‑modal interaction.
+
+Emotional Intelligence & Well‑being – Proactive mental health and engagement monitoring.
+
+Integration Readiness – Prepare data structures and APIs for seamless connection with Quiz, IDE, and Career modules.
+
+Performance & Scale – Optimize for hundreds of concurrent AI requests and real‑time interactions.
+
+1. Intelligent Teaching Assistant Bot
+Overview
+Create a persistent AI assistant available in every class. Students and teachers can ask questions, get explanations, receive assignment hints, and request summaries – all within the context of their specific class materials.
+
+Features
+1.1 Contextual Q&A with RAG (Retrieval‑Augmented Generation)
+Knowledge Base: All class resources (PDFs, videos, posts, assignments) are chunked, embedded, and stored in a vector database (pgvector or Pinecone).
+
+Query Flow:
+
+Student asks a question in the class chat or dedicated bot interface.
+System retrieves the most relevant content chunks using vector similarity.
+Retrieved chunks + question are sent to LLM (Gemini/OpenAI) with a prompt to answer based only on the provided context.
+Bot responds with answer and optionally cites sources (“From Chapter 3, page 5…”).
+Fallback: If no relevant context found, bot can say “I don’t see that in your class materials. Would you like me to search the web?” (optional).
+
+1.2 Proactive Assistance
+When a student spends >5 minutes on an assignment without submission, bot can offer a hint (e.g., “Stuck on Question 2? Here’s a similar example…”).
+
+When a new resource is added, bot announces it in the stream with a summary.
+
+1.3 Teacher‑Facing Bot Features
+Teachers can ask the bot: “Summarize the last 3 days of discussions”, “What topics are students struggling with?”, “Generate a practice quiz on Chapter 4”.
+
+Bot can auto‑reply to common student questions (e.g., “When is the assignment due?”) using calendar data.
+
+1.4 Bot Persona & Branding
+Give the bot a name (e.g., “Edu”).
+
+Customizable avatar and welcome message per class.
+
+Teachers can set bot behavior (e.g., “encouraging”, “strict”, “formal”).
+
+Technical Implementation
+Database Additions:
+
+sql
+-- Store document chunks for RAG
+CREATE TABLE document_chunks (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
+  chunk_index INT NOT NULL,
+  content TEXT NOT NULL,
+  embedding vector(1536), -- if using pgvector
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Store conversations with the bot (optional, for improvement)
+CREATE TABLE bot_conversations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  class_id UUID REFERENCES classes(id) ON DELETE CASCADE,
+  question TEXT NOT NULL,
+  answer TEXT NOT NULL,
+  sources JSONB, -- array of chunk IDs or resource IDs
+  feedback BOOLEAN, -- thumbs up/down from user
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+API Endpoints:
+
+Method	Endpoint	Description	Auth
+POST	/ai/bot/ask	Ask the teaching assistant a question (requires class context)	Enrolled
+POST	/ai/bot/feedback	Provide feedback on a bot response (thumbs up/down)	User
+GET	/ai/bot/analytics/:classId	Teacher view of common questions, confusion topics	Teacher
+WebSocket Events:
+
+bot_message – real‑time delivery of bot responses (streaming optional).
+
+bot_typing – indicate bot is generating.
+
+Frontend Components:
+
+Bot Chat Panel: Slide‑out chat interface in the class view.
+
+Embedded Bot Widget: Small floating icon that expands to chat.
+
+Bot Card in Stream: For proactive announcements.
+
+2. Personalized Learning Paths
+Overview
+For each student, the AI creates a custom sequence of resources and assignments tailored to their strengths, weaknesses, and learning pace. This turns the class from “one size fits all” to “one size fits one.”
+
+Features
+2.1 Student Skill Profiling
+Build a skill map for each subject (e.g., “Algebra”, “Quadratic Equations”, “Factoring”).
+
+Track mastery based on:
+
+Quiz/assignment scores.
+
+Time spent on resources.
+
+Confidence check‑ins (from Phase 3).
+
+Store skill levels (0‑100) in a student_skills table.
+
+2.2 Dynamic Path Generation
+When a student enters a class, AI generates a personalized playlist:
+
+Remedial content for weak prerequisite skills.
+
+Standard content for average skills.
+
+Enrichment content for advanced skills.
+
+Path updates in real‑time as the student progresses.
+
+2.3 Adaptive Difficulty
+For assignments with multiple difficulty levels, AI recommends the appropriate level.
+
+If a student aces a topic, they skip basic content and move to advanced.
+
+2.4 Student‑Facing Dashboard
+Show “Your Learning Path” with progress bars, next steps, and “Why this recommendation?” tooltips.
+
+Allow students to override (e.g., “I want to practice more basics”).
+
+Technical Implementation
+Database Additions:
+
+sql
+-- Skill definitions (per class or global)
+CREATE TABLE skills (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  class_id UUID REFERENCES classes(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  description TEXT,
+  prerequisites JSONB -- array of skill IDs
+);
+
+-- Student mastery
+CREATE TABLE student_skills (
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  skill_id UUID NOT NULL REFERENCES skills(id) ON DELETE CASCADE,
+  mastery_level INT DEFAULT 0, -- 0-100
+  last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  PRIMARY KEY (student_id, skill_id)
+);
+
+-- Personalized learning path items
+CREATE TABLE learning_path_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  student_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  resource_id UUID REFERENCES resources(id) ON DELETE CASCADE,
+  assignment_id UUID REFERENCES assignments(id) ON DELETE CASCADE,
+  skill_id UUID REFERENCES skills(id),
+  position INT NOT NULL,
+  status TEXT DEFAULT 'pending' -- pending, completed, skipped
+);
+API Endpoints:
+
+Method	Endpoint	Description	Auth
+GET	/learning-path/:classId	Get personalized learning path for current student	Student
+POST	/learning-path/refresh	Force regeneration of learning path	Student
+POST	/learning-path/item/:id/complete	Mark item as completed	Student
+GET	/analytics/class/:id/skill-mastery	Heatmap of skill mastery across class	Teacher
+AI Integration:
+
+Use a rule‑based engine initially (if‑then based on mastery thresholds).
+
+For smarter recommendations, use a collaborative filtering model that learns which sequences work best for similar students.
+
+3. Advanced Content Creation Suite
+Overview
+Empower teachers to create entire learning experiences with AI assistance – from unit plans to interactive content.
+
+Features
+3.1 Full Unit Generator
+Teacher inputs: topic, grade, duration (e.g., “2 weeks”), learning objectives.
+
+AI generates:
+
+Daily lesson plans (with timing).
+
+Accompanying slide outlines (text).
+
+Interactive activities (polls, discussions).
+
+Quiz questions (for each day).
+
+Suggested external resources (videos, articles).
+
+Teacher can edit, regenerate, or export.
+
+3.2 Interactive Video Creator
+Convert passive YouTube/video links into interactive lessons.
+
+AI generates timestamped questions that pause the video.
+
+Students answer before proceeding; results feed into analytics.
+
+3.3 AI‑Generated Rubrics
+Teacher inputs assignment description.
+
+AI generates a detailed rubric with criteria and point values.
+
+Teacher can customize.
+
+3.4 Content Repurposing
+Take an existing resource (e.g., PDF chapter) and generate:
+
+Flashcards
+
+Crossword puzzles
+
+Fill‑in‑the‑blank exercises
+
+Discussion prompts
+
+API Endpoints
+Method	Endpoint	Description	Auth
+POST	/ai/generate-unit	Generate full unit plan	Teacher
+POST	/ai/generate-rubric	Generate rubric from assignment description	Teacher
+POST	/ai/make-interactive	Convert video URL to interactive lesson	Teacher
+POST	/ai/repurpose	Generate flashcards, puzzles from content	Teacher
+4. Voice & Accessibility Features
+Overview
+Make EduSphere accessible to all learners, including those with disabilities or different learning preferences.
+
+Features
+4.1 Voice Commands
+Students can speak: “Read this article”, “Summarize today’s announcements”, “What’s my next task?”.
+
+Use Web Speech API for speech‑to‑text; bot processes and responds.
+
+4.2 Text‑to‑Speech (TTS)
+Every resource, post, and comment can be read aloud.
+
+Highlight text as it’s read.
+
+Speed control (0.5x – 2x).
+
+4.3 Dyslexia‑Friendly Mode
+Special font (OpenDyslexic).
+
+Increased letter spacing.
+
+High contrast themes.
+
+Reduce motion.
+
+4.4 Translation
+Auto‑translate any content into the user’s preferred language.
+
+Store language preference in user profile.
+
+Use Google Translate API or similar.
+
+Implementation
+TTS: Use Web Speech API’s speechSynthesis for browser, or a service like Google Cloud TTS for higher quality.
+
+Voice commands: Integrate with the bot API – convert speech to text, send to /ai/bot/ask, then read response aloud.
+
+Database:
+Add language and accessibility_preferences (JSONB) to users table.
+
+5. Emotional Intelligence & Well‑being
+Overview
+Proactively monitor student well‑being and engagement, with appropriate interventions.
+
+Features
+5.1 Advanced Sentiment Monitoring
+Track sentiment over time per student.
+
+Detect significant negative shifts (e.g., from positive to consistently negative).
+
+Alert teacher and/or counselor.
+
+5.2 Engagement Anomaly Detection
+Flag students whose engagement drops suddenly (e.g., no logins for 3 days, no submissions).
+
+Correlate with grades and sentiment.
+
+5.3 Well‑being Check‑ins
+Periodic anonymous check‑ins: “How are you feeling today?” (emoji scale).
+
+Trend analysis for class well‑being.
+
+5.4 Resource Recommendations for Well‑being
+If stress detected, suggest mindfulness resources, counselor contact, or relaxation exercises.
+
+Privacy & Ethics
+All well‑being features must be opt‑in for students/parents.
+
+Anonymize data for class‑level trends.
+
+Escalate only to designated counselors, not teachers (optional).
+
+API Endpoints:
+
+Method	Endpoint	Description	Auth
+POST	/wellbeing/checkin	Submit daily mood (anonymous)	Student
+GET	/wellbeing/class/:id/trends	Anonymized class well‑being trends	Teacher/Counselor
+GET	/wellbeing/student/:id/alert	Get alerts for a specific student (counselor only)	Counselor
+6. Integration Readiness
+Overview
+Prepare the Classroom module to seamlessly connect with upcoming EduSphere modules: Quiz Portal, Coding IDE, and Career Engine.
+
+Requirements
+6.1 Unified Data Model
+Ensure all user actions (quiz attempts, code submissions, career activities) are logged in the same user_activities table with consistent activity_type values.
+
+Add module column to distinguish ('classroom', 'quiz', 'coding', 'career').
+
+6.2 Single Sign‑On (SSO)
+Already have JWT; ensure the same token works across all modules.
+
+Plan for future microservices architecture (auth service).
+
+6.3 Cross‑Module Recommendations
+Example: If a student struggles with a coding concept in IDE, recommend relevant classroom resources.
+
+Store skill mappings across modules.
+
+6.4 API Gateway Preparation
+Structure APIs with versioning (/api/v1/classroom, /api/v1/quiz, etc.).
+
+Document all APIs for future gateway integration.
+
+6.5 Event Bus
+Set up a simple event bus using Redis Pub/Sub for cross‑module communication.
+
+Example: When a student completes a quiz, publish quiz.completed event; Classroom listens and updates skill mastery.
+
+7. Performance & Scale
+Overview
+Ensure the platform can handle hundreds of concurrent AI requests and real‑time interactions.
+
+Optimizations
+7.1 AI Request Caching
+Cache common bot questions (e.g., “When is the assignment due?”) with short TTL.
+
+Use Redis for cache.
+
+7.2 Rate Limiting
+Per‑user rate limits for AI endpoints (e.g., 10 requests/minute).
+
+Queue non‑urgent AI tasks (like generating recommendations) to background jobs.
+
+7.3 Vector Search Optimization
+Use pgvector with indexing (IVFFlat or HNSW) for fast similarity search.
+
+Consider moving to a dedicated vector DB (Pinecone) at scale.
+
+7.4 WebSocket Scaling
+Use Redis adapter for Socket.io to support multiple server instances.
+
+Implement horizontal scaling with Kubernetes (future).
+
+7.5 Database Indexing
+Add indexes on frequently queried columns: user_activities.user_id, notifications.user_id, document_chunks.embedding (if using vector).
+
+Summary of New API Endpoints
+Module	Method	Endpoint	Description
+Bot	POST	/ai/bot/ask	Ask teaching assistant
+Bot	POST	/ai/bot/feedback	Provide feedback on bot response
+Bot	GET	/ai/bot/analytics/:classId	Bot usage analytics
+Learning Path	GET	/learning-path/:classId	Get personalized path
+Learning Path	POST	/learning-path/refresh	Regenerate path
+Learning Path	POST	/learning-path/item/:id/complete	Mark item complete
+Skills	GET	/analytics/class/:id/skill-mastery	Skill mastery heatmap
+Content	POST	/ai/generate-unit	Generate full unit
+Content	POST	/ai/generate-rubric	Generate rubric
+Content	POST	/ai/make-interactive	Make video interactive
+Content	POST	/ai/repurpose	Generate flashcards, etc.
+Well‑being	POST	/wellbeing/checkin	Submit mood check‑in
+Well‑being	GET	/wellbeing/class/:id/trends	Class well‑being trends
+Well‑being	GET	/wellbeing/student/:id/alert	Student alerts (counselor)
+Frontend Components for Phase 4
+Bot Chat Interface: Floating chat widget with message history, typing indicator, and source citations.
+
+Learning Path Dashboard: Visual timeline of recommended resources with progress tracking.
+
+Unit Generator Wizard: Step‑by‑step form with preview and edit capabilities.
+
+Interactive Video Player: Video player with embedded questions at timestamps.
+
+Accessibility Panel: User‑controllable settings for font, contrast, TTS, translation.
+
+Well‑being Dashboard: For teachers/counselors – anonymized trends and alerts.
+
+Skill Mastery Heatmap: Visual grid of skills vs. students (teacher view).
+
+Technical Deliverables
+Database Migrations: All new tables and indexes.
+
+AI Service Enhancements: RAG pipeline, embedding generation, vector search.
+
+Backend Services: Bot controller, learning path engine, content generation service.
+
+WebSocket Events: Bot messaging, typing indicators.
+
+Frontend Components: All new UIs listed above.
+
+Background Jobs: For recommendation generation, risk scoring, well‑being alerts.
+
+Integration Hooks: Event definitions for cross‑module communication.
+
+Updated Documentation: Environment variables, setup guide, API docs.
+

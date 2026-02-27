@@ -57,7 +57,7 @@ export function useCreateAssignment() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ classId, data }: { classId: string; data: InsertAssignment & { dueDate?: string } }) => {
+    mutationFn: async ({ classId, data }: { classId: string; data: any }) => {
       const url = buildUrl(api.assignments.create.path, { classId });
       const res = await fetch(url, {
         method: api.assignments.create.method,
@@ -93,12 +93,12 @@ export function useCreateSubmission() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ assignmentId, data }: { assignmentId: string; data: InsertSubmission }) => {
+    mutationFn: async ({ assignmentId, data }: { assignmentId: string; data: any }) => {
       const url = buildUrl(api.submissions.create.path, { assignmentId });
       const res = await fetch(url, {
         method: api.submissions.create.method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ ...data, assignmentId }),
         credentials: "include",
       });
       if (!res.ok) throw new Error("Failed to submit assignment");
@@ -130,6 +130,164 @@ export function useGradeSubmission() {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: [api.submissions.list.path, variables.assignmentId] });
       toast({ title: "Grade saved" });
+    },
+  });
+}
+export function useResources(topicId: string) {
+  return useQuery({
+    queryKey: [api.resources.list.path, topicId],
+    queryFn: async () => {
+      const url = buildUrl(api.resources.list.path, { topicId });
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch resources");
+      return api.resources.list.responses[200].parse(await res.json());
+    },
+    enabled: !!topicId,
+  });
+}
+
+export function useCreateResource() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ topicId, data }: { topicId: string; data: any }) => {
+      const url = buildUrl(api.resources.create.path, { topicId });
+      const res = await fetch(url, {
+        method: api.resources.create.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to create resource");
+      return api.resources.create.responses[201].parse(await res.json());
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: [api.resources.list.path, variables.topicId] });
+      toast({ title: "Material added" });
+    },
+  });
+}
+
+export function useUpdateResourceVersion() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ resourceId, fileUrl, fileType }: { resourceId: string, fileUrl: string, fileType?: string }) => {
+      const res = await fetch(`/api/resources/${resourceId}/version`, {
+        method: 'PATCH',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fileUrl, fileType }),
+      });
+      if (!res.ok) throw new Error("Failed to update resource version");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [api.resources.list.path] });
+      toast({ title: "Version updated", description: "The resource file has been updated, and the old version was archived." });
+    },
+  });
+}
+
+export function useSummarize() {
+  return useMutation({
+    mutationFn: async (data: { resourceId?: string, text: string }) => {
+      const res = await fetch(api.ai.summarize.path, {
+        method: api.ai.summarize.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to summarize");
+      return res.json();
+    }
+  });
+}
+
+export function useSuggestTags() {
+  return useMutation({
+    mutationFn: async (data: { text: string }) => {
+      const res = await fetch(api.ai.suggestTags.path, {
+        method: api.ai.suggestTags.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to suggest tags");
+      return res.json();
+    }
+  });
+}
+
+export function useRecommendations(resourceId: string) {
+  return useQuery({
+    queryKey: [api.resources.recommendations.path, resourceId],
+    queryFn: async () => {
+      const url = buildUrl(api.resources.recommendations.path, { resourceId });
+      const res = await fetch(url, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch recommendations");
+      return api.resources.recommendations.responses[200].parse(await res.json());
+    },
+    enabled: !!resourceId,
+  });
+}
+
+export function useGenerateLessonPlan() {
+  return useMutation({
+    mutationFn: async (data: { topic: string, grade: string, duration: string, objectives: string }) => {
+      const res = await fetch(api.ai.lessonPlan.path, {
+        method: api.ai.lessonPlan.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to generate lesson plan");
+      return res.json();
+    }
+  });
+}
+
+export function useGenerateQuiz() {
+  return useMutation({
+    mutationFn: async (data: { topic: string }) => {
+      const res = await fetch(api.ai.generateQuiz.path, {
+        method: api.ai.generateQuiz.method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to generate quiz");
+      return res.json();
+    }
+  });
+}
+
+export function useAssignmentReviews(assignmentId: string) {
+  return useQuery({
+    queryKey: ["/api/assignments", assignmentId, "reviews"],
+    queryFn: async () => {
+      const res = await fetch(`/api/assignments/${assignmentId}/reviews`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch reviews");
+      return res.json();
+    },
+    enabled: !!assignmentId,
+  });
+}
+
+export function useModerateReview() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ reviewId, data }: { reviewId: string; data: { score: string; isFlagged: boolean } }) => {
+      const res = await fetch(`/api/reviews/${reviewId}`, {
+        method: 'PATCH',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) throw new Error("Failed to moderate review");
+      return res.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/assignments"] });
+      toast({ title: "Review Moderated", description: "The peer review has been updated." });
     },
   });
 }

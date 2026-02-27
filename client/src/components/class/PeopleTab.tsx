@@ -1,10 +1,63 @@
 import { useClassRoster } from "@/hooks/use-classes";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Users, MessageSquare, Link, Mail } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { api } from "@shared/routes";
+import { useAuth } from "@/hooks/use-auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, classCode: string, isTeacher: boolean }) {
+  const { user: currentUser } = useAuth();
+  const [, setLocation] = useLocation();
   const { data: roster, isLoading } = useClassRoster(classId);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [parentEmail, setParentEmail] = useState("");
+
+  const startConversation = useMutation({
+    mutationFn: async (otherUserId: string) => {
+      const res = await fetch('/api/conversations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'direct',
+          participants: [otherUserId]
+        })
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      setLocation('/messages');
+    }
+  });
+
+  const sendInvitation = useMutation({
+    mutationFn: async ({ studentId, email }: { studentId: string, email: string }) => {
+      const res = await fetch('/api/parents/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ studentId, parentEmail: email })
+      });
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Invitation sent", description: `An email has been sent to ${parentEmail}` });
+      setSelectedStudent(null);
+      setParentEmail("");
+    },
+    onError: (err: any) => {
+      toast({ title: "Failed to send invitation", description: err.message, variant: "destructive" });
+    }
+  });
 
   if (isLoading) {
     return <div className="space-y-4 max-w-3xl mx-auto p-4 animate-pulse">
@@ -19,7 +72,7 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
 
   return (
     <div className="max-w-3xl mx-auto space-y-12 pb-12 px-2 sm:px-0">
-      
+
       {isTeacher && (
         <Card className="bg-primary/5 border-primary/20 shadow-none mb-8">
           <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -47,6 +100,17 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
                 <p className="font-medium text-foreground">{teacher.name}</p>
                 <p className="text-sm text-muted-foreground">{teacher.email}</p>
               </div>
+              {currentUser?.id !== teacher.id && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-full text-primary hover:bg-primary/10"
+                  onClick={() => startConversation.mutate(teacher.id)}
+                >
+                  <MessageSquare size={16} className="mr-2" />
+                  Message
+                </Button>
+              )}
             </div>
           ))}
         </div>
@@ -57,7 +121,7 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
           <h2 className="text-3xl font-display font-medium text-primary">Students</h2>
           <span className="text-sm font-medium text-muted-foreground mb-1">{students.length} students</span>
         </div>
-        
+
         {students.length === 0 ? (
           <div className="text-center py-12">
             <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
@@ -74,6 +138,64 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
                 <div className="flex-1">
                   <p className="font-medium text-foreground">{student.name}</p>
                 </div>
+                {currentUser?.id !== student.id && (
+                  <div className="flex gap-2">
+                    {isTeacher && (
+                      <Dialog open={selectedStudent?.id === student.id} onOpenChange={(open) => !open && setSelectedStudent(null)}>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-full text-muted-foreground hover:text-primary"
+                            onClick={() => setSelectedStudent(student)}
+                          >
+                            <Link size={16} className="mr-2" />
+                            Link Parent
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Link Parent for {student.name}</DialogTitle>
+                          </DialogHeader>
+                          <div className="py-4 space-y-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="email">Parent's Email Address</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="email"
+                                  type="email"
+                                  placeholder="parent@example.com"
+                                  className="pl-10"
+                                  value={parentEmail}
+                                  onChange={(e) => setParentEmail(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button variant="ghost" onClick={() => setSelectedStudent(null)}>Cancel</Button>
+                            <Button
+                              onClick={() => sendInvitation.mutate({ studentId: student.id, email: parentEmail })}
+                              disabled={sendInvitation.isPending || !parentEmail}
+                            >
+                              Send Invitation
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-full text-primary hover:bg-primary/10"
+                      onClick={() => startConversation.mutate(student.id)}
+                    >
+                      <MessageSquare size={16} className="mr-2" />
+                      Message
+                    </Button>
+                  </div>
+                )}
               </div>
             ))}
           </div>

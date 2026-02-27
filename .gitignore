@@ -1,6 +1,47 @@
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables — NEVER commit real secrets
+.env
+.env.local
+.env.*.local
+
+# Local uploads (use S3 in production)
+uploads/
+
+# macOS
 .DS_Store
+
+# Vite
 server/public
 vite.config.ts.*
+
+# Archives
 *.tar.gz
+*.zip
+
+# Temporary / debug files in root
+tsc_output*.txt
+test-db.js
+test-db.ts
+create-db.cjs
+create-db.js
+
+# Large binary/media assets (add to .env.example or CDN instead)
+*.webp
+*.mp4
+*.avi
+
+# Local Replit metadata
+.replit
+.local/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*

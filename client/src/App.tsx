@@ -7,6 +7,11 @@ import NotFound from "@/pages/not-found";
 import AuthPage from "@/pages/AuthPage";
 import Dashboard from "@/pages/Dashboard";
 import ClassView from "@/pages/ClassView";
+import ParentDashboard from "@/pages/ParentDashboard";
+import Messaging from "@/pages/Messaging";
+import NotificationSettings from "@/pages/NotificationSettings";
+import ParentInvitationPage from "@/pages/ParentInvitationPage";
+import AdminDashboard from "@/pages/AdminDashboard";
 import { useAuth } from "@/hooks/use-auth";
 
 function ProtectedRoute({ component: Component, ...rest }: any) {
@@ -30,12 +35,35 @@ function Router() {
     <Switch>
       <Route path="/login" component={AuthPage} />
       <Route path="/">
-        {() => <ProtectedRoute component={Dashboard} />}
+        {() => (
+          <ProtectedRoute
+            component={() => {
+              const { user } = useAuth();
+              if (user?.role === "super_admin") {
+                return <Redirect to="/admin" />;
+              }
+              if (user?.role === "parent") {
+                return <ParentDashboard />;
+              }
+              return <Dashboard />;
+            }}
+          />
+        )}
+      </Route>
+      <Route path="/admin">
+        {() => <ProtectedRoute component={AdminDashboard} />}
       </Route>
       <Route path="/class/:classId">
         {() => <ProtectedRoute component={ClassView} />}
       </Route>
-      
+      <Route path="/messages">
+        {() => <ProtectedRoute component={Messaging} />}
+      </Route>
+      <Route path="/settings/notifications">
+        {() => <ProtectedRoute component={NotificationSettings} />}
+      </Route>
+      <Route path="/parent/register" component={ParentInvitationPage} />
+
       <Route component={NotFound} />
     </Switch>
   );

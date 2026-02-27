@@ -1,7 +1,8 @@
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { BookOpen, LogOut, Bell } from "lucide-react";
+import { BookOpen, LogOut, MessageSquare, Settings, Shield } from "lucide-react";
+import { NotificationCenter } from "./NotificationCenter";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,11 +28,21 @@ export function Navbar() {
           </Link>
 
           {user && (
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-                <Bell size={20} />
-                <span className="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-destructive border-2 border-background"></span>
-              </Button>
+            <div className="flex items-center gap-2">
+              {user.role === 'super_admin' && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full relative hover:bg-red-50" title="Admin Panel">
+                    <Shield className="h-5 w-5 text-red-500" />
+                  </Button>
+                </Link>
+              )}
+              <Link href="/messages">
+                <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full relative hover:bg-primary/10" title="Messages">
+                  <MessageSquare className="h-5 w-5 text-muted-foreground" />
+                </Button>
+              </Link>
+
+              <NotificationCenter />
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -55,6 +66,13 @@ export function Navbar() {
                   <DropdownMenuItem className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Role: {user.role}
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <Link href="/settings/notifications">
+                    <DropdownMenuItem className="cursor-pointer">
+                      <Settings className="mr-2 h-4 w-4" />
+                      <span>Notification Settings</span>
+                    </DropdownMenuItem>
+                  </Link>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:bg-destructive/10 cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />

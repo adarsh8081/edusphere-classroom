@@ -21,7 +21,7 @@ export function useCreatePost() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ classId, data }: { classId: string; data: InsertPost }) => {
+    mutationFn: async ({ classId, data }: { classId: string; data: any }) => {
       const url = buildUrl(api.posts.create.path, { classId });
       const res = await fetch(url, {
         method: api.posts.create.method,

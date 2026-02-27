@@ -1,0 +1,243 @@
+EduSphere Classroom Feature – Phase 3 Development Prompt
+Phase 3 Overview
+Phase 3 focuses on intelligent, AI-powered enhancements that elevate EduSphere from a feature‑rich LMS to a truly adaptive and predictive educational platform. You will also complete a few remaining items from Phase 2 (parent linking frontend, production email, advanced peer review) to ensure a polished experience before introducing AI.
+
+Goals
+Complete Phase 2 “Next Steps” – Parent‑student linking UI, production email provider, and advanced peer review tools.
+
+AI‑Driven Analytics – Sentiment analysis on discussions and feedback, plus predictive early warning for at‑risk students.
+
+Smart Content Assistance – Auto‑tagging of resources, AI‑powered quiz generation, and content summarization.
+
+Personalized Recommendations – “Students who viewed this also viewed…” based on collaborative filtering.
+
+Teacher‑Facing AI Tools – Basic lesson plan generator from a topic description.
+
+Infrastructure for AI – Integration with OpenAI/Gemini APIs, background job processing, and vector search (optional).
+
+1. Complete Phase 2 Leftovers
+1.1 Parent‑Student Linking Frontend
+UI for Teachers: In the People tab, add a “Link Parent” button next to each student. Clicking opens a modal where the teacher can enter the parent’s email address. The system sends an invitation email with a unique link to register as a parent and automatically links them to that student.
+
+Parent Registration Flow: When a parent clicks the invitation link, they are taken to a registration page (if new) or login page (if existing). After authentication, the parent is linked to the student (backend creates record in parent_students table).
+
+Parent Dashboard Updates: Already built in Phase 2, but ensure it shows the newly linked child.
+
+1.2 Production Email Provider Integration
+Replace the mock Nodemailer implementation with a real email service (SendGrid, AWS SES, or Resend).
+
+Add environment variables for API keys.
+
+Use a background job queue (Bull with Redis) to send emails asynchronously.
+
+Update the notification service to actually send emails based on user preferences.
+
+1.3 Advanced Peer Review Tools
+Randomized Assignment: When a teacher enables peer review, the system automatically assigns each student a configurable number of peer submissions to review (e.g., 2 reviews per student). Ensure no student reviews their own submission and distribution is balanced.
+
+Moderation Dashboard: Teachers can see all peer reviews, flag inappropriate ones, and override scores.
+
+Review Notifications: Students get notified when they are assigned reviews and when their own work receives a review.
+
+Review Template: Teachers can provide a rubric or guiding questions for reviews.
+
+Database Updates (if not already present):
+
+reviews table as described in Phase 2.
+
+Add review_deadline and reviews_per_student columns to assignments.
+
+Add is_flagged and moderated_by columns to reviews.
+
+2. AI‑Driven Analytics
+2.1 Sentiment Analysis on Stream & Feedback
+Use a pre‑trained model (via Hugging Face Inference API) or call OpenAI/Gemini to classify the sentiment (positive, neutral, negative) of:
+
+Every new post and comment in the Stream.
+
+Feedback submitted by students (if any).
+
+Store sentiment result in a new column (sentiment) in posts, comments, and feedback tables.
+
+Teacher Dashboard: Show a “Class Sentiment” gauge (e.g., pie chart of positive/negative/neutral) over the last 7 days. Highlight concerning trends (e.g., spike in negative comments) with an alert.
+
+2.2 Early Warning System (At‑Risk Prediction)
+Combine multiple data points into a risk score for each student:
+
+Engagement (login frequency, resource views, participation)
+
+Assignment submission rate and timeliness
+
+Grades trend (dropping)
+
+Sentiment (if student posts negative comments)
+
+Attendance (absences)
+
+Implement a rule‑based scoring system initially (simpler, no ML). For each factor, assign points; if total exceeds a threshold, flag as “at risk”.
+
+Teacher Alert: Display a list of at‑risk students in the Analytics dashboard, with reasons (e.g., “Missed 2 assignments, low engagement”).
+
+Automated Intervention: Optionally send an email to the teacher and/or parent.
+
+Database:
+
+Add risk_score and risk_factors (JSONB) to enrollments or a new student_risk table, updated daily via cron job.
+
+3. Smart Content Assistance
+3.1 Auto‑Tagging of Resources
+When a teacher uploads a resource (PDF, image, etc.), extract text (if PDF) and use AI to suggest relevant tags (e.g., “algebra”, “photosynthesis”).
+
+Present these suggestions to the teacher; they can accept, modify, or add more.
+
+Store tags in a new tags table and a many‑to‑many resource_tags table.
+
+Later, tags can be used for search and recommendations.
+
+API:
+
+POST /ai/suggest-tags – accepts resource ID or text, returns array of suggested tags.
+
+3.2 Content Summarizer
+For long resources (PDFs, articles), provide a “Summarize” button for teachers and students.
+
+Use AI to generate a 3‑5 sentence summary.
+
+Store summary in a new summary column in resources table.
+
+API:
+
+POST /ai/summarize – accepts text or resource ID, returns summary.
+
+3.3 AI‑Powered Quiz Generator
+Teachers can select a resource (or multiple) and click “Generate Quiz”.
+
+AI creates a set of multiple‑choice questions based on the content.
+
+Teacher can edit questions before publishing them as an assignment or a standalone quiz (which will later integrate with the Quiz module).
+
+Return questions in a structured JSON format.
+
+API:
+
+POST /ai/generate-quiz – accepts resource IDs or text, returns array of question objects.
+
+4. Personalized Recommendations
+4.1 “Students Also Viewed” Recommendations
+Use collaborative filtering based on resource view history.
+
+When a student views a resource, show a list of resources that other students in the same class (or similar classes) also viewed.
+
+Implement using simple association rules (e.g., count co‑views) or use a library like recombee or build a custom SQL query with a co‑occurrence matrix.
+
+Database:
+
+Already have user_activities with activity_type = 'view_resource'. Use this to compute recommendations periodically (cron job) and store in a resource_recommendations table.
+
+4.2 Personalized Learning Path (Stretch Goal)
+For each student, based on their weak areas (from grades), suggest a list of resources and practice assignments to improve.
+
+Can be rule‑based: identify topics with low scores, then recommend resources tagged with those topics.
+
+5. Teacher‑Facing AI Tools
+5.1 Basic Lesson Plan Generator
+In the Classwork tab, add a “Generate Lesson Plan” button.
+
+Teacher inputs: topic, grade level, duration (e.g., “45 minutes”), learning objectives (optional).
+
+AI generates a structured plan with:
+
+Hook / introduction
+
+Main activity (with estimated time)
+
+Guided practice
+
+Independent practice
+
+Assessment / exit ticket
+
+Teacher can copy, edit, or directly create assignments from the generated plan.
+
+API:
+
+POST /ai/lesson-plan – accepts topic, grade, duration, objectives → returns structured plan.
+
+6. Infrastructure for AI
+6.1 AI Service Integration
+Choose an AI provider: OpenAI (GPT‑4o), Google Gemini, or open‑source models via Hugging Face.
+
+Create a service module (services/aiService.js) that encapsulates API calls with proper error handling and rate limiting.
+
+Use environment variables for API keys.
+
+6.2 Background Jobs
+For tasks like generating recommendations or updating risk scores, use a job queue (Bull) to run them periodically (e.g., every night).
+
+For real‑time AI tasks (summarize, quiz generation), call synchronously with a loading indicator in the UI.
+
+6.3 Vector Search (Optional but Recommended)
+For better recommendations and semantic search, consider using pgvector to store embeddings of resources.
+
+Generate embeddings via AI API and store them in the database. Then you can find similar resources by cosine distance.
+
+Database:
+
+Add embedding column to resources (vector type if using pgvector). Requires PostgreSQL extension.
+
+API Endpoints Summary (New)
+Method	Endpoint	Description	Auth
+POST	/parents/invite	Send parent invitation email (teacher)	Teacher
+GET	/parents/link/:token	Verify invitation token and link parent	Public
+POST	/ai/suggest-tags	Suggest tags for a resource	Teacher
+POST	/ai/summarize	Summarize text or resource	Any
+POST	/ai/generate-quiz	Generate quiz questions from content	Teacher
+POST	/ai/lesson-plan	Generate lesson plan	Teacher
+GET	/analytics/class/:id/sentiment	Get class sentiment trends	Teacher
+GET	/analytics/class/:id/atrisk	Get list of at‑risk students with reasons	Teacher
+GET	/resources/:id/recommendations	Get recommended resources (similar/viewed also)	Enrolled
+Frontend Components for Phase 3
+Parent Linking
+In People tab, for each student row (teacher view), add a “Link Parent” button. Opens modal with email input and “Send Invite”.
+
+Parent invitation page (public route) that shows “You have been invited to monitor …” and prompts registration/login.
+
+AI Features UI
+Resource Details Page: Add “Summarize” button, “Generate Quiz” button, and “Suggest Tags” button (teacher only). Display tags with ability to add/remove.
+
+Quiz Generator Modal: Shows generated questions in an editable list; teacher can save as assignment.
+
+Lesson Plan Generator: Button in Classwork, opens a form (topic, grade, duration) and after generation shows a structured plan with option to create assignments from each section.
+
+Analytics Enhancements
+Add “Sentiment” tab to Analytics dashboard, showing sentiment trend graph and recent flagged comments.
+
+Add “At‑Risk Students” widget with list and drill‑down.
+
+Recommendations
+On resource view page, add a sidebar “Recommended for You” showing resources other students viewed.
+
+Technical Considerations
+AI Costs: Implement rate limiting and caching. For summarization, only generate once and store result.
+
+Privacy: Ensure no student data is sent to AI APIs without consent (include a notice). For sentiment analysis, consider using a local model (e.g., via TensorFlow.js) to keep data on‑premises.
+
+Background Jobs: Use Bull with Redis. Add a worker process that processes queues.
+
+Error Handling: AI APIs may fail; show friendly error messages and allow retry.
+
+Deliverables
+Complete all Phase 3 features as described.
+
+Provide updated database migration scripts.
+
+Update backend with new routes, controllers, and AI service integration.
+
+Implement frontend components and integrate with APIs.
+
+Update environment variables documentation.
+
+Ensure all features are tested (unit/integration where applicable).
+
+Provide a brief demo video or walkthrough of new AI capabilities.
+
