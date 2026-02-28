@@ -4,9 +4,11 @@ import {
   users, classes, enrollments, posts, comments, topics, resources, assignments, submissions, attendance, notifications,
   parentStudents, parentInvitations, conversations, conversationParticipants, messages, messageReads, polls, pollOptions, pollVotes,
   prerequisites, reviews, studentRisk, resourceRecommendations, notificationPreferences, userActivities,
+  guilds, guildMembers, guildChannels, forumPosts, forumComments, careerPaths, studentCareerProgress,
   type User, type InsertUser, type Class, type InsertClass, type Post, type InsertPost, type Comment, type InsertComment,
   type Topic, type InsertTopic, type Resource, type InsertResource, type Assignment, type InsertAssignment,
-  type Submission, type InsertSubmission, type Attendance, type Notification
+  type Submission, type InsertSubmission, type Attendance, type Notification,
+  type Guild, type ForumPost, type CareerPath
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -131,6 +133,22 @@ export interface IStorage {
   deleteClass(classId: string): Promise<void>;
   getRecentActivity(limit?: number): Promise<any[]>;
   getAllFlaggedWellbeing(): Promise<any[]>;
+  // v2 Ecosystem: Guilds
+  createGuild(guild: any): Promise<Guild>;
+  getGuilds(classId?: string): Promise<Guild[]>;
+  getGuildChannels(guildId: string): Promise<any[]>;
+  joinGuild(guildId: string, userId: string, role?: string): Promise<void>;
+
+  // v2 Ecosystem: Forums
+  createForumPost(post: any): Promise<ForumPost>;
+  getForumPosts(communityId?: string): Promise<any[]>;
+  getForumComments(postId: string): Promise<any[]>;
+  voteForumPost(postId: string, userId: string, direction: 'up' | 'down'): Promise<void>;
+
+  // v2 Ecosystem: Career Launchpad
+  getCareerPaths(category?: string): Promise<CareerPath[]>;
+  enrollInCareerPath(studentId: string, pathId: string): Promise<void>;
+  getStudentCareerProgress(studentId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -893,8 +911,101 @@ export class DatabaseStorage implements IStorage {
     const { wellbeingCheckins } = await import('@shared/schema');
     return db.select()
       .from(wellbeingCheckins)
-      .where(eq(wellbeingCheckins.classId, classId))
-      .orderBy(wellbeingCheckins.createdAt); // We'll aggregate this in the route/frontend later
+      .where(eq(wellbeingCheckins.isFlagged, true))
+      .orderBy(desc(wellbeingCheckins.createdAt));
+  }
+
+  // v2 Ecosystem: Guilds
+  async createGuild(guild: any): Promise<Guild> {
+    const [newGuild] = await db.insert(guilds).values(guild).returning();
+    // Create default general channel
+    await db.insert(guildChannels).values({
+      guildId: newGuild.id,
+      name: "general",
+      type: "text",
+      topic: "General discussion"
+    });
+    return newGuild;
+  }
+
+  async getGuilds(classId?: string): Promise<Guild[]> {
+    if (classId) {
+      return db.select().from(guilds).where(eq(guilds.classId, classId));
+    }
+    return db.select().from(guilds);
+  }
+
+  async getGuildChannels(guildId: string): Promise<any[]> {
+    return db.select().from(guildChannels).where(eq(guildChannels.guildId, guildId)).orderBy(guildChannels.position);
+  }
+
+  async joinGuild(guildId: string, userId: string, role: string = "member"): Promise<void> {
+    await db.insert(guildMembers).values({ guildId, userId, role }).onConflictDoNothing();
+  }
+
+  // v2 Ecosystem: Forums
+  async createForumPost(post: any): Promise<ForumPost> {
+    const [newPost] = await db.insert(forumPosts).values(post).returning();
+    return newPost;
+  }
+
+  async getForumPosts(communityId?: string): Promise<any[]> {
+    let query = db.select({
+      post: forumPosts,
+      author: users,
+    })
+      .from(forumPosts)
+      .innerJoin(users, eq(users.id, forumPosts.authorId));
+
+    if (communityId) {
+      query = query.where(eq(forumPosts.communityId, communityId)) as any;
+    }
+
+    return query.orderBy(desc(forumPosts.createdAt));
+  }
+
+  async getForumComments(postId: string): Promise<any[]> {
+    return db.select({
+      comment: forumComments,
+      author: users,
+    })
+      .from(forumComments)
+      .innerJoin(users, eq(users.id, forumComments.authorId))
+      .where(eq(forumComments.postId, postId))
+      .orderBy(forumComments.createdAt);
+  }
+
+  async voteForumPost(postId: string, userId: string, direction: 'up' | 'down'): Promise<void> {
+    const increment = direction === 'up' ? 1 : -1;
+    const field = direction === 'up' ? forumPosts.upvotes : forumPosts.downvotes;
+
+    await db.update(forumPosts)
+      .set({
+        [direction === 'up' ? 'upvotes' : 'downvotes']: sql`${field} + 1`
+      })
+      .where(eq(forumPosts.id, postId));
+  }
+
+  // v2 Ecosystem: Career Launchpad
+  async getCareerPaths(category?: string): Promise<CareerPath[]> {
+    if (category) {
+      return db.select().from(careerPaths).where(eq(careerPaths.category, category));
+    }
+    return db.select().from(careerPaths);
+  }
+
+  async enrollInCareerPath(studentId: string, pathId: string): Promise<void> {
+    await db.insert(studentCareerProgress).values({ studentId, pathId, status: 'enrolled' }).onConflictDoNothing();
+  }
+
+  async getStudentCareerProgress(studentId: string): Promise<any[]> {
+    return db.select({
+      progress: studentCareerProgress,
+      path: careerPaths,
+    })
+      .from(studentCareerProgress)
+      .innerJoin(careerPaths, eq(careerPaths.id, studentCareerProgress.pathId))
+      .where(eq(studentCareerProgress.studentId, studentId));
   }
 
   // ========== Admin Dashboard Methods ==========

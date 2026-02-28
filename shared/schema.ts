@@ -381,6 +381,81 @@ export const learningPathItems = pgTable("learning_path_items", {
   status: text("status").default('pending'), // 'pending', 'completed', 'skipped'
 });
 
+// v2 Ecosystem: Guilds (Discord-like Study Groups)
+export const guilds = pgTable("guilds", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  iconUrl: text("icon_url"),
+  classId: varchar("class_id"), // Optional: guilds can be class-specific or general
+  createdBy: varchar("created_by").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const guildMembers = pgTable("guild_members", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  guildId: varchar("guild_id").notNull(),
+  userId: varchar("user_id").notNull(),
+  role: text("role").notNull().default("member"), // 'admin', 'moderator', 'member'
+  joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow(),
+}, (t) => ({
+  unq: unique().on(t.guildId, t.userId),
+}));
+
+export const guildChannels = pgTable("guild_channels", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  guildId: varchar("guild_id").notNull(),
+  name: text("name").notNull(),
+  type: text("type").notNull().default("text"), // 'text', 'voice'
+  topic: text("topic"),
+  position: integer("position").notNull().default(0),
+});
+
+// v2 Ecosystem: Forums (Reddit-like Knowledge Sharing)
+export const forumPosts = pgTable("forum_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  authorId: varchar("author_id").notNull(),
+  communityId: text("community_id").notNull().default("general"),
+  upvotes: integer("upvotes").default(0),
+  downvotes: integer("downvotes").default(0),
+  isPinned: boolean("is_pinned").default(false),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }),
+});
+
+export const forumComments = pgTable("forum_comments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  postId: varchar("post_id").notNull(),
+  authorId: varchar("author_id").notNull(),
+  parentId: varchar("parent_id"), // for nested threads
+  content: text("content").notNull(),
+  upvotes: integer("upvotes").default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+// v2 Ecosystem: Career Launchpad
+export const careerPaths = pgTable("career_paths", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // 'web_dev', 'data_science', 'ai', etc.
+  difficulty: text("difficulty").notNull(), // 'beginner', 'intermediate', 'advanced'
+  estimatedHours: integer("estimated_hours"),
+});
+
+export const studentCareerProgress = pgTable("student_career_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  studentId: varchar("student_id").notNull(),
+  pathId: varchar("path_id").notNull(),
+  status: text("status").notNull().default("not_started"), // 'enrolled', 'completed'
+  enrolledAt: timestamp("enrolled_at", { withTimezone: true }).defaultNow(),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+}, (t) => ({
+  unq: unique().on(t.studentId, t.pathId),
+}));
+
 // Zod schemas
 export const insertUserSchema = createInsertSchema(users).omit({ id: true, createdAt: true });
 export const insertClassSchema = createInsertSchema(classes).omit({ id: true, createdAt: true, classCode: true, teacherId: true });
@@ -397,6 +472,11 @@ export const insertBotConversationSchema = createInsertSchema(botConversations).
 export const insertSkillSchema = createInsertSchema(skills).omit({ id: true });
 export const insertLearningPathItemSchema = createInsertSchema(learningPathItems).omit({ id: true });
 export const insertWellbeingCheckinSchema = createInsertSchema(wellbeingCheckins).omit({ id: true, createdAt: true, aiSentimentScore: true, isFlagged: true });
+
+// v2 Zod Schemas
+export const insertGuildSchema = createInsertSchema(guilds).omit({ id: true, createdAt: true });
+export const insertForumPostSchema = createInsertSchema(forumPosts).omit({ id: true, createdAt: true, updatedAt: true });
+export const insertCareerPathSchema = createInsertSchema(careerPaths).omit({ id: true });
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -427,3 +507,8 @@ export type Skill = typeof skills.$inferSelect;
 export type StudentSkill = typeof studentSkills.$inferSelect;
 export type LearningPathItem = typeof learningPathItems.$inferSelect;
 export type WellbeingCheckin = typeof wellbeingCheckins.$inferSelect;
+
+// v2 Phase Types
+export type Guild = typeof guilds.$inferSelect;
+export type ForumPost = typeof forumPosts.$inferSelect;
+export type CareerPath = typeof careerPaths.$inferSelect;

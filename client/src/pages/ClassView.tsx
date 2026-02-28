@@ -71,28 +71,28 @@ export default function ClassView() {
 
       {/* Class Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="bg-gradient-to-r from-primary to-cyan-500 text-white rounded-3xl overflow-hidden relative shadow-[0_20px_40px_-15px_rgba(23,226,255,0.4)] border-white/20">
-          {/* Decorative floating sphere behind banner text */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-[40px] mix-blend-overlay pointer-events-none"></div>
+        <div className="holographic-card bg-gradient-to-br from-primary to-indigo-600 text-white rounded-[2.5rem] overflow-hidden relative shadow-2xl border-white/10 group">
+          <div className="absolute inset-0 bg-white/5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-[60px] mix-blend-overlay pointer-events-none group-hover:scale-110 transition-transform duration-1000"></div>
 
           <div className="px-6 sm:px-12 py-10 md:py-16 relative z-10">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-3 tracking-tight break-words">{classData.name}</h1>
-            <p className="text-white/90 text-lg sm:text-xl max-w-2xl font-medium mb-6 sm:mb-0">{classData.subject} • {classData.grade}</p>
+            <h1 className="text-3xl sm:text-4xl md:text-6xl font-display font-extrabold mb-3 tracking-tight break-words drop-shadow-2xl">{classData.name}</h1>
+            <p className="text-white/80 text-lg sm:text-xl max-w-2xl font-bold uppercase tracking-widest mb-6 sm:mb-0 drop-shadow-md">{classData.subject} • {classData.grade}</p>
 
-            <div className="flex flex-wrap gap-3 sm:absolute sm:bottom-6 sm:right-6">
+            <div className="flex flex-wrap gap-4 sm:absolute sm:bottom-8 sm:right-8">
               <Button
                 variant="secondary"
-                className="bg-white hover:bg-white/90 text-primary border-none shadow-lg transition-all font-bold rounded-xl h-10 sm:h-11 px-4 sm:px-6"
+                className="bg-white/10 backdrop-blur-xl border border-white/20 hover:bg-white hover:text-primary text-white shadow-2xl transition-all font-bold rounded-2xl h-12 sm:h-14 px-6 sm:px-8 group/btn"
                 onClick={() => window.open(`https://meet.jit.si/edusphere-${classData.classCode}`, '_blank')}
               >
-                <Video className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-                Join Meeting
+                <Video className="w-5 h-5 sm:w-6 sm:h-6 mr-3 group-hover/btn:scale-110 transition-transform" />
+                Live Session
               </Button>
               {isTeacher && (
-                <div className="flex gap-2 sm:gap-3">
+                <div className="flex gap-3">
                   <ContentGenerator classId={classId!} />
-                  <Button variant="secondary" size="icon" className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-md shadow-lg rounded-xl h-10 w-10 sm:h-11 sm:w-11">
-                    <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <Button variant="secondary" size="icon" className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-xl shadow-2xl rounded-2xl h-12 w-12 sm:h-14 sm:w-14">
+                    <Settings className="w-5 h-5 sm:w-6 sm:h-6" />
                   </Button>
                 </div>
               )}
@@ -103,55 +103,27 @@ export default function ClassView() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <Tabs defaultValue="stream" className="w-full">
-          <TabsList className="flex h-auto p-2 bg-black/5 dark:bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl mb-8 justify-start overflow-x-auto no-scrollbar gap-2 shadow-inner">
-            <TabsTrigger
-              value="stream"
-              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
-            >
-              Stream
-            </TabsTrigger>
-            <TabsTrigger
-              value="classwork"
-              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
-            >
-              Classwork
-            </TabsTrigger>
-            <TabsTrigger
-              value="people"
-              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
-            >
-              People
-            </TabsTrigger>
-            <TabsTrigger
-              value="attendance"
-              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
-            >
-              Attendance
-            </TabsTrigger>
-            {!isTeacher && (
+          <TabsList className="flex h-auto p-2 glass-panel border-white/10 rounded-[2rem] mb-10 justify-start overflow-x-auto scroll-hide gap-2 shadow-2xl">
+            {[
+              { value: "stream", label: "Stream", icon: null },
+              { value: "classwork", label: "Classwork", icon: null },
+              { value: "people", label: "People", icon: null },
+              { value: "attendance", label: "Attendance", icon: null },
+              { value: "grades", label: "Grades", icon: null, hide: isTeacher },
+              { value: "analytics", label: "Analytics", icon: null, hide: !isTeacher },
+              { value: "wellbeing", label: "Well-being", icon: Heart, hide: !isTeacher, color: "text-rose-400" },
+            ].filter(t => !t.hide).map((tab) => (
               <TabsTrigger
-                value="grades"
-                className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
+                key={tab.value}
+                value={tab.value}
+                className={`rounded-[1.25rem] px-6 py-3 text-sm font-bold transition-all border-none
+                  data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/20
+                  text-muted-foreground hover:bg-white/5 hover:text-foreground`}
               >
-                Grades
+                {tab.icon && <tab.icon className={`w-4 h-4 mr-2 ${tab.color}`} />}
+                {tab.label}
               </TabsTrigger>
-            )}
-            {isTeacher && (
-              <TabsTrigger
-                value="analytics"
-                className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
-              >
-                Analytics
-              </TabsTrigger>
-            )}
-            {isTeacher && (
-              <TabsTrigger
-                value="wellbeing"
-                className="rounded-xl data-[state=active]:bg-amber-100/80 dark:data-[state=active]:bg-amber-900/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-amber-700 text-muted-foreground hover:bg-amber-50/40 transition-all border-none flexitems-center"
-              >
-                <Heart className="w-4 h-4 mr-2" /> Well-being
-              </TabsTrigger>
-            )}
+            ))}
           </TabsList>
 
           <TabsContent value="stream" className="mt-0 outline-none">

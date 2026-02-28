@@ -331,6 +331,70 @@ export const api = {
       responses: { 200: z.object({ message: z.string() }) }
     }
   },
+  guilds: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/guilds' as const,
+      responses: { 200: z.array(z.any()) }
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/guilds' as const,
+      input: z.object({ name: z.string(), description: z.string().optional(), classId: z.string().optional() }),
+      responses: { 201: z.any() }
+    },
+    channels: {
+      method: 'GET' as const,
+      path: '/api/guilds/:guildId/channels' as const,
+      responses: { 200: z.array(z.any()) }
+    },
+    join: {
+      method: 'POST' as const,
+      path: '/api/guilds/:guildId/join' as const,
+      responses: { 200: z.object({ message: z.string() }) }
+    }
+  },
+  forums: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/forums' as const,
+      responses: { 200: z.array(z.any()) }
+    },
+    create: {
+      method: 'POST' as const,
+      path: '/api/forums' as const,
+      input: z.object({ title: z.string(), content: z.string(), communityId: z.string().optional() }),
+      responses: { 201: z.any() }
+    },
+    comments: {
+      method: 'GET' as const,
+      path: '/api/forums/posts/:postId/comments' as const,
+      responses: { 200: z.array(z.any()) }
+    },
+    vote: {
+      method: 'POST' as const,
+      path: '/api/forums/posts/:postId/vote' as const,
+      input: z.object({ direction: z.enum(['up', 'down']) }),
+      responses: { 200: z.object({ success: z.boolean() }) }
+    }
+  },
+  career: {
+    list: {
+      method: 'GET' as const,
+      path: '/api/career/paths' as const,
+      responses: { 200: z.array(z.any()) }
+    },
+    enroll: {
+      method: 'POST' as const,
+      path: '/api/career/paths/:pathId/enroll' as const,
+      responses: { 200: z.object({ message: z.string() }) }
+    },
+    progress: {
+      method: 'GET' as const,
+      path: '/api/career/progress' as const,
+      responses: { 200: z.array(z.any()) }
+    }
+  },
   ai: {
     summarize: {
       method: 'POST' as const,

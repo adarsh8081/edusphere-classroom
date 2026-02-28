@@ -899,6 +899,92 @@ export async function registerRoutes(
     }
   });
 
+  // ── v2 Ecosystem Routes ─────────────────────────────────────────────────────
+
+  // 1. Guilds (Discord-like Study Groups)
+  app.get(api.guilds.list.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const classId = req.query.classId as string;
+    const guilds = await storage.getGuilds(classId);
+    res.json(guilds);
+  });
+
+  app.post(api.guilds.create.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user as any;
+    const body = api.guilds.create.input.parse(req.body);
+    const newGuild = await storage.createGuild({ ...body, createdBy: user.id });
+    await storage.joinGuild(newGuild.id, user.id, "admin");
+    res.status(201).json(newGuild);
+  });
+
+  app.get(api.guilds.channels.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const channels = await storage.getGuildChannels(req.params.guildId);
+    res.json(channels);
+  });
+
+  app.post(api.guilds.join.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user as any;
+    await storage.joinGuild(req.params.guildId, user.id);
+    res.json({ message: "Joined guild successfully" });
+  });
+
+  // 2. Forums (Reddit-like Knowledge Sharing)
+  app.get(api.forums.list.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const communityId = req.query.communityId as string;
+    const posts = await storage.getForumPosts(communityId);
+    res.json(posts);
+  });
+
+  app.post(api.forums.create.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user as any;
+    const body = api.forums.create.input.parse(req.body);
+    const newPost = await storage.createForumPost({ ...body, authorId: user.id });
+    res.status(201).json(newPost);
+  });
+
+  app.get(api.forums.comments.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const comments = await storage.getForumComments(req.params.postId);
+    res.json(comments);
+  });
+
+  app.post(api.forums.vote.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user as any;
+    const { direction } = api.forums.vote.input.parse(req.body);
+    await storage.voteForumPost(req.params.postId, user.id, direction);
+    res.json({ success: true });
+  });
+
+  // 3. Career Launchpad
+  app.get(api.career.list.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const category = req.query.category as string;
+    const paths = await storage.getCareerPaths(category);
+    res.json(paths);
+  });
+
+  app.post(api.career.enroll.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user as any;
+    await storage.enrollInCareerPath(user.id, req.params.pathId);
+    res.json({ message: "Enrolled in career path" });
+  });
+
+  app.get(api.career.progress.path, async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user as any;
+    const progress = await storage.getStudentCareerProgress(user.id);
+    res.json(progress);
+  });
+
+  // ────────────────────────────────────────────────────────────────────────────
+
   // User search — for starting conversations in messaging
   app.get("/api/users/search", async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });

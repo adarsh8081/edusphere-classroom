@@ -39,19 +39,20 @@ export default function Dashboard() {
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-56 glossy-panel rounded-3xl animate-pulse"></div>
+              <div key={i} className="h-56 glass-panel rounded-3xl animate-pulse"></div>
             ))}
           </div>
         ) : classes?.length === 0 ? (
-          <div className="glossy-panel border-white/20 rounded-3xl p-12 text-center shadow-2xl backdrop-blur-xl max-w-2xl mx-auto">
-            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[inset_0_2px_10px_rgba(255,255,255,0.2)] border border-primary/20 animate-pulse-glow">
+          <div className="glass-panel border-white/10 rounded-[2.5rem] p-12 text-center backdrop-blur-3xl max-w-2xl mx-auto relative overflow-hidden group">
+            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-primary/20 shadow-[0_0_30px_rgba(23,226,255,0.2)]">
               <GraduationCap className="w-12 h-12 text-primary" />
             </div>
-            <h3 className="text-3xl font-display font-bold text-foreground mb-3 drop-shadow-sm">No classes yet</h3>
-            <p className="text-muted-foreground mb-8 text-lg">
+            <h3 className="text-3xl font-display font-bold text-foreground mb-3 tracking-tight">Ecosystem Initialized</h3>
+            <p className="text-muted-foreground mb-8 text-lg leading-relaxed">
               {isTeacher
-                ? "Create your first class to start posting announcements and assignments."
-                : "Join a class using the code provided by your teacher."}
+                ? "Your teaching space is ready. Create your first class to begin the journey."
+                : "Enter a class code to join the collaborative learning network."}
             </p>
             {isTeacher ? <CreateClassDialog /> : <JoinClassDialog />}
           </div>
@@ -59,45 +60,57 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {classes?.map((c: any) => (
               <Link key={c.id} href={`/class/${c.id}`}>
-                <div className="group relative matte-surface rounded-3xl border border-white/20 shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(23,226,255,0.3)] transition-all duration-500 overflow-hidden cursor-pointer h-full flex flex-col hover:-translate-y-2">
+                <div className="group holographic-card rounded-[2.5rem] border-white/10 shadow-2xl hover:shadow-primary/20 transition-all duration-700 overflow-hidden cursor-pointer h-full flex flex-col hover:-translate-y-2">
                   {/* Card Banner */}
-                  <div className="h-32 bg-gradient-to-br from-primary to-cyan-500 relative p-6 overflow-hidden">
-                    {/* Glassy Overlay effect in banner */}
-                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="h-32 bg-gradient-to-br from-primary to-indigo-600 relative p-6 overflow-hidden">
+                    <div className="absolute inset-0 bg-white/5 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
 
-                    <h3 className="text-2xl font-display font-bold text-white truncate pr-10 relative z-10 drop-shadow-md">{c.name}</h3>
-                    <p className="text-white/90 text-sm truncate font-medium relative z-10 drop-shadow-sm mt-1">{c.subject || 'General'} • {c.grade || 'All Grades'}</p>
+                    <h3 className="text-2xl font-display font-bold text-white truncate pr-10 relative z-10">{c.name}</h3>
+                    <p className="text-white/80 text-xs truncate font-bold uppercase tracking-widest relative z-10 mt-1">{c.subject || 'General'} • {c.grade || 'All Grades'}</p>
 
-                    <div className="absolute right-6 bottom-[-24px] w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl text-primary group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-20 border border-primary/10">
+                    <div className="absolute right-6 bottom-[-24px] w-14 h-14 bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl flex items-center justify-center shadow-2xl text-white group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 z-20 group-hover:bg-primary group-hover:border-primary/50">
                       <ArrowRight className="w-6 h-6" />
                     </div>
                   </div>
 
                   {/* Card Body */}
-                  <div className="p-6 pt-10 flex-1 flex flex-col bg-card/60 backdrop-blur-md">
-                    <p className="text-sm text-foreground/80 line-clamp-2 mb-6 flex-1 font-medium">
-                      {c.description || "No description provided."}
+                  <div className="p-6 pt-10 flex-1 flex flex-col relative">
+                    <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                    <p className="text-sm text-foreground/70 line-clamp-2 mb-6 flex-1 italic">
+                      {c.description || "Building the future of learning together."}
                     </p>
 
-                    <div className="flex items-center justify-between text-xs font-bold text-muted-foreground pt-5 border-t border-border/50">
+                    <div className="flex items-center justify-between pt-5 border-t border-white/5">
                       {isTeacher ? (
                         <>
-                          <span className="flex items-center gap-1.5 text-emerald-600">
-                            <Users className="w-3.5 h-3.5" /> {c.enrolledCount} Students
-                          </span>
-                          <span className="flex items-center gap-1.5 text-primary">
-                            <Activity className="w-3.5 h-3.5" /> {c.activityScore} Active
-                          </span>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Enrolled</span>
+                            <span className="flex items-center gap-1.5 text-primary font-bold text-sm">
+                              <Users className="w-3.5 h-3.5" /> {c.enrolledCount} Students
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Activity</span>
+                            <span className="flex items-center gap-1.5 text-indigo-400 font-bold text-sm">
+                              <Activity className="w-3.5 h-3.5" /> {c.activityScore || 0} Score
+                            </span>
+                          </div>
                         </>
                       ) : (
                         <>
-                          <span className={`${c.pendingAssignmentsCount > 0 ? 'text-amber-600 font-bold' : 'text-muted-foreground'} flex items-center gap-1.5`}>
-                            <ClipboardList className="w-3.5 h-3.5" /> {c.pendingAssignmentsCount} Pending
-                          </span>
-                          {c.latestGrade && (
-                            <span className="flex items-center gap-1.5 text-primary">
-                              <GraduationCap className="w-3.5 h-3.5" /> Grade: {c.latestGrade}%
+                          <div className="flex flex-col">
+                            <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Tasks</span>
+                            <span className={`${c.pendingAssignmentsCount > 0 ? 'text-orange-500' : 'text-muted-foreground'} flex items-center gap-1.5 font-bold text-sm`}>
+                              <ClipboardList className="w-3.5 h-3.5" /> {c.pendingAssignmentsCount} Pending
                             </span>
+                          </div>
+                          {c.latestGrade && (
+                            <div className="flex flex-col items-end">
+                              <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Grade</span>
+                              <span className="flex items-center gap-1.5 text-primary font-bold text-sm">
+                                <GraduationCap className="w-3.5 h-3.5" /> {c.latestGrade}%
+                              </span>
+                            </div>
                           )}
                         </>
                       )}

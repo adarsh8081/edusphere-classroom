@@ -37,6 +37,11 @@ function ProtectedRoute({ component: Component, ...rest }: any) {
   return <Component {...rest} />;
 }
 
+import EcosystemHub from "@/pages/EcosystemHub";
+import Guilds from "@/pages/Guilds";
+import Forums from "@/pages/Forums";
+import CareerLaunchpad from "@/pages/CareerLaunchpad";
+
 function Router() {
   return (
     <Switch>
@@ -56,6 +61,18 @@ function Router() {
             }}
           />
         )}
+      </Route>
+      <Route path="/ecosystem">
+        {() => <ProtectedRoute component={EcosystemHub} />}
+      </Route>
+      <Route path="/guilds">
+        {() => <ProtectedRoute component={Guilds} />}
+      </Route>
+      <Route path="/forums">
+        {() => <ProtectedRoute component={Forums} />}
+      </Route>
+      <Route path="/career">
+        {() => <ProtectedRoute component={CareerLaunchpad} />}
       </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminDashboard} />}
