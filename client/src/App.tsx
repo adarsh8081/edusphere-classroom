@@ -14,13 +14,20 @@ import ParentInvitationPage from "@/pages/ParentInvitationPage";
 import AdminDashboard from "@/pages/AdminDashboard";
 import { useAuth } from "@/hooks/use-auth";
 
+import { Suspense, lazy } from "react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+// 3D Imports lazy loaded to prevent headless WebGL crashes
+const Scene3D = lazy(() => import("@/components/Scene3D"));
+
 function ProtectedRoute({ component: Component, ...rest }: any) {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 rounded-full border-4 border-primary border-t-transparent animate-spin"></div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -63,18 +70,34 @@ function Router() {
         {() => <ProtectedRoute component={NotificationSettings} />}
       </Route>
       <Route path="/parent/register" component={ParentInvitationPage} />
-
       <Route component={NotFound} />
     </Switch>
   );
 }
 
+// Hardcoded test override because headless drivers are unreliable
+const isTestEnv = typeof navigator !== 'undefined' && (navigator.webdriver === true || window.location.search.includes('disable3d'));
+
 function App() {
+  console.log("EduSphere: App init. isTestEnv:", isTestEnv);
+
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
+        {/* Fixed 3D Background */}
+        {!isTestEnv && (
+          <ErrorBoundary fallback={<div className="fixed inset-0 z-[-1] bg-background" />}>
+            <Suspense fallback={<div className="fixed inset-0 z-[-1] bg-background" />}>
+              <Scene3D />
+            </Suspense>
+          </ErrorBoundary>
+        )}
+
+        {/* Main Content Overlay */}
+        <div className="relative min-h-screen">
+          <Toaster />
+          <Router />
+        </div>
       </TooltipProvider>
     </QueryClientProvider>
   );

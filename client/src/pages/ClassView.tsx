@@ -66,68 +66,72 @@ export default function ClassView() {
   const isTeacher = user?.role === 'teacher';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative z-10 pt-4">
       <Navbar />
 
       {/* Class Banner */}
-      <div className="bg-gradient-to-r from-primary to-violet-600 text-white shadow-inner">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 relative">
-          <h1 className="text-4xl md:text-5xl font-display font-bold mb-2">{classData.name}</h1>
-          <p className="text-white/80 text-lg max-w-2xl">{classData.subject} • {classData.grade}</p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+        <div className="bg-gradient-to-r from-primary to-cyan-500 text-white rounded-3xl overflow-hidden relative shadow-[0_20px_40px_-15px_rgba(23,226,255,0.4)] border-white/20">
+          {/* Decorative floating sphere behind banner text */}
+          <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-[40px] mix-blend-overlay pointer-events-none"></div>
 
-          <div className="flex gap-2 absolute top-4 right-4">
-            <Button
-              variant="secondary"
-              size="sm"
-              className="bg-white/10 hover:bg-white/20 text-white border-white/20 transition-all font-semibold"
-              onClick={() => window.open(`https://meet.jit.si/edusphere-${classData.classCode}`, '_blank')}
-            >
-              <Video className="w-4 h-4 mr-2" />
-              Join Class Meeting
-            </Button>
-            {isTeacher && (
-              <div className="flex gap-2">
-                <ContentGenerator classId={classId!} />
-                <Button variant="secondary" size="icon" className="bg-white/10 hover:bg-white/20 text-white border-white/20 rounded-full">
-                  <Settings className="w-5 h-5" />
-                </Button>
-              </div>
-            )}
+          <div className="px-6 sm:px-12 py-10 md:py-16 relative z-10">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-display font-bold mb-3 tracking-tight break-words">{classData.name}</h1>
+            <p className="text-white/90 text-lg sm:text-xl max-w-2xl font-medium mb-6 sm:mb-0">{classData.subject} • {classData.grade}</p>
+
+            <div className="flex flex-wrap gap-3 sm:absolute sm:bottom-6 sm:right-6">
+              <Button
+                variant="secondary"
+                className="bg-white hover:bg-white/90 text-primary border-none shadow-lg transition-all font-bold rounded-xl h-10 sm:h-11 px-4 sm:px-6"
+                onClick={() => window.open(`https://meet.jit.si/edusphere-${classData.classCode}`, '_blank')}
+              >
+                <Video className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                Join Meeting
+              </Button>
+              {isTeacher && (
+                <div className="flex gap-2 sm:gap-3">
+                  <ContentGenerator classId={classId!} />
+                  <Button variant="secondary" size="icon" className="bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur-md shadow-lg rounded-xl h-10 w-10 sm:h-11 sm:w-11">
+                    <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         <Tabs defaultValue="stream" className="w-full">
-          <TabsList className="flex h-auto p-0 bg-transparent border-b border-border/60 rounded-none mb-8 justify-start overflow-x-auto no-scrollbar gap-8">
+          <TabsList className="flex h-auto p-2 bg-black/5 dark:bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl mb-8 justify-start overflow-x-auto no-scrollbar gap-2 shadow-inner">
             <TabsTrigger
               value="stream"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
             >
               Stream
             </TabsTrigger>
             <TabsTrigger
               value="classwork"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
             >
               Classwork
             </TabsTrigger>
             <TabsTrigger
               value="people"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
             >
               People
             </TabsTrigger>
             <TabsTrigger
               value="attendance"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+              className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
             >
               Attendance
             </TabsTrigger>
             {!isTeacher && (
               <TabsTrigger
                 value="grades"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+                className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
               >
                 Grades
               </TabsTrigger>
@@ -135,7 +139,7 @@ export default function ClassView() {
             {isTeacher && (
               <TabsTrigger
                 value="analytics"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:border-primary data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+                className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-foreground text-muted-foreground hover:bg-white/40 transition-all border-none"
               >
                 Analytics
               </TabsTrigger>
@@ -143,9 +147,9 @@ export default function ClassView() {
             {isTeacher && (
               <TabsTrigger
                 value="wellbeing"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent px-0 py-3 text-base font-semibold data-[state=active]:text-primary text-muted-foreground hover:text-foreground transition-none"
+                className="rounded-xl data-[state=active]:bg-amber-100/80 dark:data-[state=active]:bg-amber-900/80 data-[state=active]:shadow-md px-6 py-3 text-sm font-bold data-[state=active]:text-amber-700 text-muted-foreground hover:bg-amber-50/40 transition-all border-none flexitems-center"
               >
-                <Heart className="w-4 h-4 mr-1.5" /> Well-being
+                <Heart className="w-4 h-4 mr-2" /> Well-being
               </TabsTrigger>
             )}
           </TabsList>

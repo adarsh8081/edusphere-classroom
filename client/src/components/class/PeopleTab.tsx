@@ -71,16 +71,17 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
   const students = roster?.filter(u => u.role === 'student') || [];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-12 pb-12 px-2 sm:px-0">
+    <div className="max-w-3xl mx-auto space-y-12 pb-12 px-2 sm:px-0 relative z-10">
 
       {isTeacher && (
-        <Card className="bg-primary/5 border-primary/20 shadow-none mb-8">
-          <CardContent className="p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <Card className="glossy-panel border-primary/20 shadow-lg mb-8 rounded-2xl overflow-hidden relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none"></div>
+          <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 relative z-10">
             <div>
-              <h3 className="font-semibold text-lg text-primary">Class Code</h3>
-              <p className="text-sm text-muted-foreground">Share this code with students so they can join your class.</p>
+              <h3 className="font-bold text-xl text-primary drop-shadow-sm flex items-center gap-2"><Link className="w-5 h-5" /> Class Code</h3>
+              <p className="text-sm font-medium text-foreground/80 mt-1">Share this code with students so they can join your class.</p>
             </div>
-            <div className="bg-white dark:bg-black px-6 py-3 rounded-lg border border-border shadow-sm text-2xl tracking-widest font-mono font-bold text-foreground select-all">
+            <div className="bg-white/50 dark:bg-black/50 backdrop-blur-md px-8 py-4 rounded-xl border border-white/20 shadow-inner text-3xl tracking-[0.2em] font-mono font-extrabold text-foreground select-all hover:bg-white/60 dark:hover:bg-black/60 transition-colors">
               {classCode}
             </div>
           </CardContent>
@@ -88,26 +89,28 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
       )}
 
       <div>
-        <h2 className="text-3xl font-display font-medium text-primary border-b-2 border-primary/20 pb-4 mb-6">Teachers</h2>
-        <div className="space-y-2">
+        <h2 className="text-3xl font-display font-extrabold text-primary border-b-2 border-primary/20 pb-4 mb-6 drop-shadow-sm flex items-center gap-3">
+          <Users className="w-8 h-8 opacity-80" /> Teachers
+        </h2>
+        <div className="space-y-3">
           {teachers.map(teacher => (
-            <div key={teacher.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 rounded-xl transition-colors">
-              <Avatar className="h-10 w-10 border shadow-sm">
+            <div key={teacher.id} className="flex items-center gap-5 p-5 bg-black/5 dark:bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-300 border border-white/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 group">
+              <Avatar className="h-12 w-12 border-2 border-primary/20 shadow-inner group-hover:border-primary/40 transition-colors">
                 <AvatarImage src={teacher.avatarUrl || undefined} />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium">{teacher.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="bg-primary/20 text-primary font-bold">{teacher.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="font-medium text-foreground">{teacher.name}</p>
-                <p className="text-sm text-muted-foreground">{teacher.email}</p>
+                <p className="font-bold text-foreground text-lg">{teacher.name}</p>
+                <p className="text-sm font-medium text-muted-foreground">{teacher.email}</p>
               </div>
               {currentUser?.id !== teacher.id && (
                 <Button
-                  variant="ghost"
+                  variant="secondary"
                   size="sm"
-                  className="rounded-full text-primary hover:bg-primary/10"
+                  className="rounded-xl text-primary font-bold hover:bg-primary/10 shadow-sm border-white/20 backdrop-blur-sm h-10 px-4"
                   onClick={() => startConversation.mutate(teacher.id)}
                 >
-                  <MessageSquare size={16} className="mr-2" />
+                  <MessageSquare size={18} className="mr-2 drop-shadow-sm" />
                   Message
                 </Button>
               )}
@@ -116,57 +119,59 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
         </div>
       </div>
 
-      <div>
+      <div className="pt-6">
         <div className="flex items-end justify-between border-b-2 border-primary/20 pb-4 mb-6">
-          <h2 className="text-3xl font-display font-medium text-primary">Students</h2>
-          <span className="text-sm font-medium text-muted-foreground mb-1">{students.length} students</span>
+          <h2 className="text-3xl font-display font-extrabold text-primary drop-shadow-sm flex items-center gap-3">
+            <Users className="w-8 h-8 opacity-80" /> Students
+          </h2>
+          <span className="text-sm font-bold text-muted-foreground bg-primary/10 px-3 py-1 rounded-full border border-primary/20">{students.length} students</span>
         </div>
 
         {students.length === 0 ? (
-          <div className="text-center py-12">
-            <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">No students have joined this class yet.</p>
+          <div className="text-center py-16 glossy-panel rounded-3xl border border-white/20 shadow-inner">
+            <Users className="w-16 h-16 text-primary/30 mx-auto mb-4 drop-shadow-sm" />
+            <p className="text-lg font-medium text-foreground/80">No students have joined this class yet.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {students.map(student => (
-              <div key={student.id} className="flex items-center gap-4 p-4 hover:bg-muted/30 rounded-xl transition-colors border border-transparent hover:border-border/50">
-                <Avatar className="h-10 w-10 border shadow-sm">
+              <div key={student.id} className="flex items-center gap-5 p-4 bg-black/5 dark:bg-white/5 hover:bg-white/10 rounded-2xl transition-all duration-300 border border-white/10 shadow-sm hover:shadow-md hover:-translate-y-0.5 group">
+                <Avatar className="h-12 w-12 border border-white/20 shadow-inner group-hover:border-primary/30 transition-colors">
                   <AvatarImage src={student.avatarUrl || undefined} />
-                  <AvatarFallback className="bg-secondary text-secondary-foreground font-medium">{student.name.charAt(0)}</AvatarFallback>
+                  <AvatarFallback className="bg-gradient-to-br from-primary/20 to-cyan-500/20 text-primary font-bold">{student.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <p className="font-medium text-foreground">{student.name}</p>
+                  <p className="font-bold text-foreground text-lg">{student.name}</p>
                 </div>
                 {currentUser?.id !== student.id && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     {isTeacher && (
                       <Dialog open={selectedStudent?.id === student.id} onOpenChange={(open) => !open && setSelectedStudent(null)}>
                         <DialogTrigger asChild>
                           <Button
-                            variant="outline"
+                            variant="secondary"
                             size="sm"
-                            className="rounded-full text-muted-foreground hover:text-primary"
+                            className="rounded-xl text-muted-foreground hover:text-primary font-bold h-10 px-4 border-white/20 shadow-sm backdrop-blur-sm bg-white/5 hover:bg-white/10"
                             onClick={() => setSelectedStudent(student)}
                           >
-                            <Link size={16} className="mr-2" />
+                            <Link size={18} className="mr-2 opacity-70" />
                             Link Parent
                           </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent className="matte-surface border-white/20 shadow-2xl rounded-3xl">
                           <DialogHeader>
-                            <DialogTitle>Link Parent for {student.name}</DialogTitle>
+                            <DialogTitle className="text-xl font-bold">Link Parent for {student.name}</DialogTitle>
                           </DialogHeader>
-                          <div className="py-4 space-y-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="email">Parent's Email Address</Label>
+                          <div className="py-6 space-y-4">
+                            <div className="space-y-3">
+                              <Label htmlFor="email" className="font-bold ml-1">Parent's Email Address</Label>
                               <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Mail className="absolute left-4 top-3.5 h-5 w-5 text-muted-foreground" />
                                 <Input
                                   id="email"
                                   type="email"
                                   placeholder="parent@example.com"
-                                  className="pl-10"
+                                  className="pl-12 h-12 rounded-xl bg-black/5 dark:bg-white/5 border-white/10 shadow-inner focus:ring-primary/40 text-base"
                                   value={parentEmail}
                                   onChange={(e) => setParentEmail(e.target.value)}
                                 />
@@ -174,8 +179,9 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
                             </div>
                           </div>
                           <DialogFooter>
-                            <Button variant="ghost" onClick={() => setSelectedStudent(null)}>Cancel</Button>
+                            <Button variant="ghost" className="rounded-xl font-bold" onClick={() => setSelectedStudent(null)}>Cancel</Button>
                             <Button
+                              className="rounded-xl font-bold shadow-lg shadow-primary/20 h-10 px-6"
                               onClick={() => sendInvitation.mutate({ studentId: student.id, email: parentEmail })}
                               disabled={sendInvitation.isPending || !parentEmail}
                             >
@@ -186,12 +192,12 @@ export function PeopleTab({ classId, classCode, isTeacher }: { classId: string, 
                       </Dialog>
                     )}
                     <Button
-                      variant="ghost"
+                      variant="secondary"
                       size="sm"
-                      className="rounded-full text-primary hover:bg-primary/10"
+                      className="rounded-xl text-primary font-bold hover:bg-primary/10 shadow-sm border-white/20 backdrop-blur-sm h-10 px-4"
                       onClick={() => startConversation.mutate(student.id)}
                     >
-                      <MessageSquare size={16} className="mr-2" />
+                      <MessageSquare size={18} className="mr-2 drop-shadow-sm" />
                       Message
                     </Button>
                   </div>

@@ -95,11 +95,11 @@ export function ClassworkTab({ classId }: { classId: string }) {
   return (
     <div className="space-y-10 max-w-4xl mx-auto pb-12">
       {isTeacher && (
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-wrap gap-4 items-center">
           <Dialog open={isAssignmentDialogOpen} onOpenChange={setIsAssignmentDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="hover-elevate rounded-full shadow-md shadow-primary/20">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button className="hover-elevate rounded-xl shadow-lg shadow-primary/30 h-10 px-6 font-bold bg-primary hover:bg-primary/90 text-primary-foreground transition-all">
+                <Plus className="w-5 h-5 mr-2 drop-shadow-sm" />
                 Create Assignment
               </Button>
             </DialogTrigger>
@@ -242,12 +242,12 @@ export function ClassworkTab({ classId }: { classId: string }) {
       ))}
 
       {topics?.length === 0 && assignments?.length === 0 && (
-        <div className="text-center py-20 px-4 bg-muted/20 rounded-3xl border border-dashed border-border mt-8">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-primary" />
+        <div className="text-center py-20 px-4 glossy-panel rounded-3xl border border-white/20 shadow-xl backdrop-blur-md mt-8">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner animate-pulse-glow">
+            <FileText className="w-10 h-10 text-primary drop-shadow-md" />
           </div>
-          <h3 className="text-xl font-semibold text-foreground mb-2">Classwork empty</h3>
-          <p className="text-muted-foreground max-w-sm mx-auto">
+          <h3 className="text-2xl font-bold text-foreground mb-2 drop-shadow-sm">Classwork empty</h3>
+          <p className="text-muted-foreground text-lg max-w-sm mx-auto font-medium">
             {isTeacher ? "Create assignments and organize them into topics to structure your class." : "Your teacher hasn't assigned any work yet."}
           </p>
         </div>
@@ -298,30 +298,30 @@ function AssignmentItem({ assignment, isTeacher }: { assignment: any, isTeacher:
   const isPastDue = assignment.dueDate && new Date(assignment.dueDate) < new Date();
 
   return (
-    <Accordion type="single" collapsible className="w-full bg-card rounded-xl border border-border/60 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+    <Accordion type="single" collapsible className="w-full matte-surface rounded-2xl border border-white/10 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden mb-3">
       <AccordionItem value="item-1" className="border-0">
-        <AccordionTrigger className="px-4 sm:px-6 hover:no-underline hover:bg-muted/30 group py-4">
-          <div className="flex items-center gap-4 w-full text-left">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors text-primary">
-              <FileText className="w-5 h-5" />
+        <AccordionTrigger className="px-5 sm:px-6 hover:no-underline group py-5 bg-black/5 dark:bg-white/5 transition-colors duration-300 backdrop-blur-sm">
+          <div className="flex items-center gap-5 w-full text-left">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center shrink-0 group-hover:from-primary group-hover:to-cyan-500 group-hover:text-white transition-all duration-300 text-primary shadow-inner border border-primary/20 group-hover:shadow-[0_0_15px_rgba(23,226,255,0.4)]">
+              <FileText className="w-6 h-6 transition-transform group-hover:scale-110 drop-shadow-sm" />
             </div>
             <div className="flex-1 overflow-hidden">
-              <h4 className="font-semibold text-base text-foreground truncate">{assignment.title}</h4>
-              <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1">
+              <h4 className="font-bold text-lg text-foreground truncate drop-shadow-sm">{assignment.title}</h4>
+              <div className="flex items-center gap-3 text-xs font-semibold text-muted-foreground mt-1.5 flex-wrap">
                 {assignment.dueDate && (
-                  <span className={`flex items-center gap-1 ${isPastDue && !mySubmission ? 'text-destructive font-medium' : ''}`}>
-                    <Calendar className="w-3 h-3" />
+                  <span className={`flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/40 dark:bg-black/40 shadow-sm ${isPastDue && !mySubmission ? 'text-destructive' : ''}`}>
+                    <Calendar className="w-3.5 h-3.5" />
                     Due {format(new Date(assignment.dueDate), "MMM d, h:mm a")}
                   </span>
                 )}
                 {mySubmission && (
-                  <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 flex items-center gap-1 h-5 px-1.5 text-[10px]">
-                    <CheckCircle2 className="w-3 h-3" /> Turned in
+                  <Badge variant="secondary" className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/30 flex items-center gap-1.5 h-6 px-2.5 text-xs font-bold shadow-sm backdrop-blur-sm border border-emerald-500/30">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Turned in
                   </Badge>
                 )}
                 {assignment.isLocked && !isTeacher && (
-                  <Badge variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/10 flex items-center gap-1 h-5 px-1.5 text-[10px]">
-                    <Lock className="w-3 h-3" /> Locked
+                  <Badge variant="secondary" className="bg-destructive/10 text-destructive hover:bg-destructive/20 flex items-center gap-1.5 h-6 px-2.5 text-xs font-bold shadow-sm backdrop-blur-sm border border-destructive/20">
+                    <Lock className="w-3.5 h-3.5" /> Locked
                   </Badge>
                 )}
               </div>
@@ -347,54 +347,56 @@ function AssignmentItem({ assignment, isTeacher }: { assignment: any, isTeacher:
 
             <div className="md:col-span-1">
               {!isTeacher ? (
-                <Card className="shadow-none border-border bg-background">
-                  <CardHeader className="p-4 pb-2">
-                    <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                <Card className="glossy-panel border-white/20 shadow-xl overflow-hidden rounded-2xl relative">
+                  {/* Subtle gradient background for student work box */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-cyan-400/5 opacity-50 z-0"></div>
+                  <CardHeader className="p-5 pb-3 relative z-10 border-b border-white/10">
+                    <CardTitle className="text-base font-bold flex items-center justify-between drop-shadow-sm">
                       Your Work
                       {mySubmission?.grade !== null && mySubmission?.grade !== undefined && (
-                        <Badge variant="outline" className="text-primary border-primary/30 bg-primary/5">
-                          {mySubmission.grade} / {assignment.maxPoints}
+                        <Badge variant="outline" className="text-primary border-primary/30 bg-primary/10 shadow-sm text-sm py-1 px-3">
+                          {mySubmission.grade} / {assignment.maxPoints} pts
                         </Badge>
                       )}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 pt-2 space-y-4">
+                  <CardContent className="p-5 pt-4 space-y-4 relative z-10">
                     {mySubmission ? (
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         {mySubmission.fileUrl && (
-                          <a href={mySubmission.fileUrl} target="_blank" rel="noreferrer" className="flex items-center p-2 rounded border hover:bg-muted text-sm text-primary break-all">
-                            <FileText className="w-4 h-4 mr-2 shrink-0" />
-                            Attachment link
+                          <a href={mySubmission.fileUrl} target="_blank" rel="noreferrer" className="flex items-center p-3 rounded-xl border border-white/20 bg-black/5 dark:bg-white/5 hover:bg-white/10 text-sm font-semibold text-primary break-all shadow-sm transition-all">
+                            <FileText className="w-5 h-5 mr-3 shrink-0" />
+                            View Attached Document
                           </a>
                         )}
                         {mySubmission.content && (
-                          <div className="p-3 bg-muted/50 rounded-md text-sm whitespace-pre-wrap border border-border/50">
+                          <div className="p-4 bg-muted/40 rounded-xl text-sm whitespace-pre-wrap border border-white/10 shadow-inner">
                             {mySubmission.content}
                           </div>
                         )}
                         {mySubmission.feedback && (
-                          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                            <p className="text-xs font-semibold text-blue-800 dark:text-blue-300 mb-1">Teacher Feedback:</p>
-                            <p className="text-sm text-blue-900 dark:text-blue-100">{mySubmission.feedback}</p>
+                          <div className="mt-5 p-4 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 border border-blue-200 dark:border-blue-700/50 rounded-xl shadow-md">
+                            <p className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-2 flex items-center gap-2"><Sparkles className="w-4 h-4" /> Teacher Feedback:</p>
+                            <p className="text-[15px] font-medium text-blue-950 dark:text-blue-100 leading-relaxed">{mySubmission.feedback}</p>
                           </div>
                         )}
                       </div>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-4">
                         <Input
                           placeholder="Link to file/document..."
                           value={submissionUrl}
                           onChange={e => setSubmissionUrl(e.target.value)}
-                          className="h-9 text-sm"
+                          className="h-11 text-sm rounded-xl border-white/10 bg-black/5 dark:bg-white/5 shadow-inner"
                         />
                         <Textarea
                           placeholder="Or type answer here..."
-                          className="min-h-[80px] text-sm resize-none"
+                          className="min-h-[100px] text-sm resize-none rounded-xl border-white/10 bg-black/5 dark:bg-white/5 shadow-inner p-3"
                           value={submissionContent}
                           onChange={e => setSubmissionContent(e.target.value)}
                         />
                         <Button
-                          className="w-full h-9"
+                          className="w-full h-11 rounded-xl font-bold shadow-lg shadow-primary/20 hover-elevate"
                           onClick={handleSubmit}
                           disabled={(!submissionUrl && !submissionContent) || createSubmission.isPending || assignment.isLocked}
                         >
@@ -603,8 +605,8 @@ function ResourceItem({ resource, isTeacher }: { resource: any, isTeacher: boole
           {isTeacher && (
             <Dialog>
               <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/10" title="Update Version">
-                  <Upload size={16} />
+                <Button variant="ghost" size="icon" className="text-primary hover:bg-primary/20 rounded-xl" title="Update Version">
+                  <Upload size={18} className="drop-shadow-sm" />
                 </Button>
               </DialogTrigger>
               <DialogContent>

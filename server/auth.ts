@@ -188,6 +188,10 @@ export function setupAuth(app: Express) {
   // ===== Google OAuth Routes =====
   app.get("/api/auth/google", (req, res, next) => {
     if (!process.env.GOOGLE_CLIENT_ID) {
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+        console.warn("GOOGLE_CLIENT_ID not found. Redirecting to mock login.");
+        return res.redirect("/api/auth/mock/google");
+      }
       return res.status(503).json({ message: "Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env" });
     }
     passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
@@ -203,6 +207,10 @@ export function setupAuth(app: Express) {
   // ===== GitHub OAuth Routes =====
   app.get("/api/auth/github", (req, res, next) => {
     if (!process.env.GITHUB_CLIENT_ID) {
+      if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+        console.warn("GITHUB_CLIENT_ID not found. Redirecting to mock login.");
+        return res.redirect("/api/auth/mock/github");
+      }
       return res.status(503).json({ message: "GitHub OAuth is not configured. Set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in .env" });
     }
     passport.authenticate("github", { scope: ["user:email"] })(req, res, next);
@@ -214,4 +222,26 @@ export function setupAuth(app: Express) {
       res.redirect("/");
     }
   );
+
+  // ===== Mock OAuth for Development =====
+  app.get("/api/auth/mock/:provider", async (req, res) => {
+    if (process.env.NODE_ENV && process.env.NODE_ENV !== "development") {
+      return res.status(403).send("Mock auth only available in development");
+    }
+
+    const provider = req.params.provider;
+    const providerId = `mock_${provider}_${Math.floor(Math.random() * 10000)}`;
+    const name = `Demo ${provider.charAt(0).toUpperCase() + provider.slice(1)} User`;
+    const email = `${provider}_test@example.com`;
+
+    try {
+      const user = await findOrCreateOAuthUser(provider, providerId, email, name);
+      req.login(user, (err) => {
+        if (err) return res.status(500).send("Login failed");
+        res.redirect("/");
+      });
+    } catch (err) {
+      res.status(500).send("Creation failed");
+    }
+  });
 }

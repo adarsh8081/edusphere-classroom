@@ -50,12 +50,16 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-violet-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary to-violet-500 shadow-xl shadow-primary/20 mb-4">
-          <BookOpen className="w-8 h-8 text-white" />
+    <div className="min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Dynamic glossy orb effects for the background behind the glass card */}
+      <div className="absolute top-1/4 left-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-primary/20 rounded-full blur-[80px] sm:blur-[100px] animate-float"></div>
+      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 sm:w-96 sm:h-96 bg-cyan-400/20 rounded-full blur-[80px] sm:blur-[100px] animate-float" style={{ animationDelay: '2s' }}></div>
+
+      <div className="mx-auto w-full max-w-md text-center relative z-10 px-4">
+        <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-primary/10 shadow-[inset_0_2px_10px_rgba(255,255,255,0.2)] border border-primary/20 mb-6 backdrop-blur-sm animate-pulse-glow">
+          <BookOpen className="w-10 h-10 text-primary drop-shadow-md" />
         </div>
-        <h2 className="text-center text-4xl font-display font-extrabold text-foreground tracking-tight">
+        <h2 className="text-center text-4xl sm:text-5xl font-display font-extrabold text-foreground tracking-tight drop-shadow-sm">
           EduSphere
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground font-medium">
@@ -63,16 +67,16 @@ export default function AuthPage() {
         </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <Card className="glass-card border-none shadow-2xl overflow-hidden rounded-2xl">
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <Card className="glossy-panel border-white/20 shadow-2xl overflow-hidden rounded-3xl">
           <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 h-14 p-1 bg-muted/50 rounded-none border-b border-border/50">
-              <TabsTrigger value="login" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm font-semibold">Login</TabsTrigger>
-              <TabsTrigger value="register" className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm text-sm font-semibold">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 h-16 p-2 bg-black/5 dark:bg-white/5 rounded-none border-b border-white/10">
+              <TabsTrigger value="login" className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-lg text-sm font-bold transition-all hover:bg-white/40">Login</TabsTrigger>
+              <TabsTrigger value="register" className="rounded-xl data-[state=active]:bg-white/80 dark:data-[state=active]:bg-black/80 data-[state=active]:shadow-lg text-sm font-bold transition-all hover:bg-white/40">Sign Up</TabsTrigger>
             </TabsList>
 
             <TabsContent value="login" className="mt-0">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 {/* OAuth Buttons */}
                 <div className="space-y-3 mb-6">
                   <a href="/api/auth/google" className="block">
@@ -101,23 +105,23 @@ export default function AuthPage() {
 
                 <form className="space-y-6" onSubmit={handleLogin}>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email address</Label>
+                    <Label htmlFor="email" className="font-bold ml-1">Email address</Label>
                     <Input
                       id="email"
                       type="email"
                       required
-                      className="h-11 bg-white/50"
+                      className="h-12 glossy-panel border-white/20 shadow-inner rounded-xl px-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                       value={loginData.email}
                       onChange={e => setLoginData({ ...loginData, email: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="font-bold ml-1">Password</Label>
                     <Input
                       id="password"
                       type="password"
                       required
-                      className="h-11 bg-white/50"
+                      className="h-12 glossy-panel border-white/20 shadow-inner rounded-xl px-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                       value={loginData.password}
                       onChange={e => setLoginData({ ...loginData, password: e.target.value })}
                     />
@@ -130,18 +134,18 @@ export default function AuthPage() {
             </TabsContent>
 
             <TabsContent value="register" className="mt-0">
-              <CardContent className="p-8">
+              <CardContent className="p-6 sm:p-8">
                 {/* OAuth Buttons */}
                 <div className="space-y-3 mb-6">
                   <a href="/api/auth/google" className="block">
-                    <Button type="button" variant="outline" className="w-full h-11 text-sm font-medium gap-3 hover:bg-gray-50 border-gray-200">
-                      <GoogleIcon className="w-5 h-5" />
+                    <Button type="button" variant="outline" className="w-full h-12 text-sm font-bold gap-3 glossy-panel hover:-translate-y-1 transition-transform border-white/20">
+                      <GoogleIcon className="w-6 h-6" />
                       Sign up with Google
                     </Button>
                   </a>
                   <a href="/api/auth/github" className="block">
-                    <Button type="button" variant="outline" className="w-full h-11 text-sm font-medium gap-3 hover:bg-gray-50 border-gray-200">
-                      <GitHubIcon className="w-5 h-5" />
+                    <Button type="button" variant="outline" className="w-full h-12 text-sm font-bold gap-3 glossy-panel hover:-translate-y-1 transition-transform border-white/20">
+                      <GitHubIcon className="w-6 h-6" />
                       Sign up with GitHub
                     </Button>
                   </a>
@@ -159,16 +163,16 @@ export default function AuthPage() {
 
                 <form className="space-y-5" onSubmit={handleRegister}>
                   <div className="space-y-2">
-                    <Label>I am a...</Label>
+                    <Label className="font-bold ml-1">I am a...</Label>
                     <div className="grid grid-cols-2 gap-4">
                       <div
-                        className={`border-2 rounded-xl p-3 text-center cursor-pointer transition-all ${registerData.role === 'student' ? 'border-primary bg-primary/5 text-primary font-semibold' : 'border-border hover:border-primary/50 text-muted-foreground'}`}
+                        className={`border-2 rounded-2xl p-4 text-center cursor-pointer transition-all ${registerData.role === 'student' ? 'border-primary bg-primary/20 text-primary font-bold shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)]' : 'border-white/20 bg-white/5 hover:bg-white/10 text-muted-foreground matte-surface'}`}
                         onClick={() => setRegisterData({ ...registerData, role: 'student' })}
                       >
                         Student
                       </div>
                       <div
-                        className={`border-2 rounded-xl p-3 text-center cursor-pointer transition-all ${registerData.role === 'teacher' ? 'border-primary bg-primary/5 text-primary font-semibold' : 'border-border hover:border-primary/50 text-muted-foreground'}`}
+                        className={`border-2 rounded-2xl p-4 text-center cursor-pointer transition-all ${registerData.role === 'teacher' ? 'border-primary bg-primary/20 text-primary font-bold shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)]' : 'border-white/20 bg-white/5 hover:bg-white/10 text-muted-foreground matte-surface'}`}
                         onClick={() => setRegisterData({ ...registerData, role: 'teacher' })}
                       >
                         Teacher
@@ -176,38 +180,38 @@ export default function AuthPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
+                    <Label htmlFor="name" className="font-bold ml-1">Full Name</Label>
                     <Input
                       id="name"
                       required
-                      className="h-11 bg-white/50"
+                      className="h-12 glossy-panel border-white/20 shadow-inner rounded-xl px-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                       value={registerData.name}
                       onChange={e => setRegisterData({ ...registerData, name: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="reg-email">Email address</Label>
+                    <Label htmlFor="reg-email" className="font-bold ml-1">Email address</Label>
                     <Input
                       id="reg-email"
                       type="email"
                       required
-                      className="h-11 bg-white/50"
+                      className="h-12 glossy-panel border-white/20 shadow-inner rounded-xl px-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                       value={registerData.email}
                       onChange={e => setRegisterData({ ...registerData, email: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="reg-password">Password</Label>
+                    <Label htmlFor="reg-password" className="font-bold ml-1">Password</Label>
                     <Input
                       id="reg-password"
                       type="password"
                       required
-                      className="h-11 bg-white/50"
+                      className="h-12 glossy-panel border-white/20 shadow-inner rounded-xl px-4 focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                       value={registerData.password}
                       onChange={e => setRegisterData({ ...registerData, password: e.target.value })}
                     />
                   </div>
-                  <Button type="submit" className="w-full h-11 text-base font-semibold hover-elevate shadow-lg shadow-primary/20" disabled={isRegistering}>
+                  <Button type="submit" className="w-full h-12 text-lg font-bold hover-elevate shadow-lg shadow-primary/30 rounded-xl" disabled={isRegistering}>
                     {isRegistering ? "Creating account..." : "Create Account"}
                   </Button>
                 </form>

@@ -99,19 +99,19 @@ export function StreamTab({ classId }: { classId: string }) {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto pb-12">
+    <div className="space-y-6 max-w-3xl mx-auto pb-12 relative z-10">
       {/* Create Post Input */}
-      <Card className="shadow-sm border-border overflow-hidden">
+      <Card className="matte-surface border-white/20 overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 rounded-3xl">
         <CardContent className="p-4 sm:p-6 flex gap-4">
-          <Avatar className="h-10 w-10 hidden sm:block">
-            <AvatarFallback className="bg-primary/10 text-primary">
+          <Avatar className="h-12 w-12 hidden sm:block ring-2 ring-primary/20 shadow-inner">
+            <AvatarFallback className="bg-primary/20 text-primary font-bold">
               {user?.name?.charAt(0)}
             </AvatarFallback>
           </Avatar>
-          <div className="flex-1 space-y-3">
+          <div className="flex-1 space-y-4">
             <Textarea
               placeholder="Announce something to your class..."
-              className="resize-none min-h-[100px] border-muted bg-muted/30 focus-visible:ring-primary/20"
+              className="resize-none min-h-[100px] border-white/10 bg-black/5 dark:bg-white/5 focus-visible:ring-primary/40 rounded-2xl shadow-inner text-base p-4"
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
             />
@@ -150,12 +150,12 @@ export function StreamTab({ classId }: { classId: string }) {
               </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <div className="flex gap-2">
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex gap-3">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`h-9 rounded-full ${showPollBuilder ? "bg-primary/10 text-primary" : ""}`}
+                  className={`h-10 rounded-xl px-4 font-bold transition-all ${showPollBuilder ? "bg-primary/20 text-primary shadow-[inset_0_2px_10px_rgba(0,0,0,0.1)]" : "hover:bg-primary/10"}`}
                   onClick={() => setShowPollBuilder(!showPollBuilder)}
                 >
                   <BarChart2 className="w-4 h-4 mr-2" />
@@ -164,7 +164,7 @@ export function StreamTab({ classId }: { classId: string }) {
                 <div className="flex items-center gap-2">
                   <Input
                     type="datetime-local"
-                    className="h-9 w-40 text-xs rounded-full"
+                    className="h-10 w-44 text-sm rounded-xl border-white/10 bg-black/5 dark:bg-white/5 shadow-inner"
                     value={scheduledAt}
                     onChange={(e) => setScheduledAt(e.target.value)}
                   />
@@ -173,10 +173,10 @@ export function StreamTab({ classId }: { classId: string }) {
               <Button
                 onClick={handleCreatePost}
                 disabled={!newPostContent.trim() || createPost.isPending}
-                className="hover-elevate rounded-full px-6"
+                className="hover-elevate rounded-xl px-8 h-10 font-bold shadow-lg shadow-primary/30"
               >
                 {createPost.isPending ? "Posting..." : "Post"}
-                <Send className="w-4 h-4 ml-2" />
+                <Send className="w-5 h-5 ml-2 drop-shadow-sm" />
               </Button>
             </div>
           </div>
@@ -185,16 +185,18 @@ export function StreamTab({ classId }: { classId: string }) {
 
       {/* Posts List */}
       {posts?.length === 0 ? (
-        <div className="text-center py-16 px-4 bg-muted/30 rounded-2xl border border-dashed border-border">
-          <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <h3 className="text-lg font-semibold text-foreground">No posts yet</h3>
-          <p className="text-muted-foreground mt-1">Be the first to share something with the class.</p>
+        <div className="text-center py-20 px-4 glossy-panel rounded-3xl border border-white/20 shadow-xl backdrop-blur-md">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner animate-pulse-glow">
+            <MessageSquare className="w-10 h-10 text-primary drop-shadow-md" />
+          </div>
+          <h3 className="text-2xl font-bold text-foreground drop-shadow-sm">No posts yet</h3>
+          <p className="text-muted-foreground mt-2 text-lg">Be the first to share something with the class.</p>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-8">
           {posts?.map((post: any) => (
-            <Card key={post.id} className="shadow-sm border-border overflow-hidden transition-all hover:shadow-md">
-              <CardHeader className="p-4 sm:p-6 pb-2">
+            <Card key={post.id} className="matte-surface border-white/20 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 rounded-3xl">
+              <CardHeader className="p-6 pb-4 border-b border-white/5 bg-white/5">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10">
                     <AvatarFallback className="bg-secondary text-secondary-foreground font-medium">
@@ -233,34 +235,37 @@ export function StreamTab({ classId }: { classId: string }) {
                 {post.comments && post.comments.length > 0 && (
                   <div className="space-y-4 w-full">
                     {post.comments.map((comment: any) => (
-                      <div key={comment.id} className="flex gap-3">
-                        <Avatar className="h-8 w-8 shrink-0">
-                          <AvatarFallback className="bg-primary/5 text-xs text-primary">
+                      <div key={comment.id} className="flex gap-4 group">
+                        <Avatar className="h-10 w-10 shrink-0 ring-1 ring-white/10 shadow-sm mt-1 mb-auto">
+                          <AvatarFallback className="bg-primary/20 text-sm font-bold text-primary">
                             {comment.author?.name?.charAt(0) || '?'}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="bg-muted/50 px-4 py-2 rounded-2xl rounded-tl-sm flex-1">
-                          <div className="flex items-baseline justify-between gap-2 mb-1">
-                            <span className="font-medium text-xs sm:text-sm text-foreground">{comment.author?.name || 'Unknown'}</span>
-                            <span className="text-[10px] text-muted-foreground shrink-0">
+                        <div className="bg-black/5 dark:bg-white/5 px-5 py-3 rounded-2xl rounded-tl-sm flex-1 shadow-inner border border-white/5 backdrop-blur-sm relative">
+                          {/* Accent line for comments */}
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/40 rounded-l-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+                          <div className="flex items-baseline justify-between gap-2 mb-2">
+                            <span className="font-bold text-sm text-foreground drop-shadow-sm">{comment.author?.name || 'Unknown'}</span>
+                            <span className="text-xs text-muted-foreground font-medium shrink-0">
                               {comment.createdAt ? format(new Date(comment.createdAt), "MMM d, h:mm a") : ''}
                             </span>
                           </div>
-                          <p className="text-sm text-foreground/80">{comment.content}</p>
+                          <p className="text-[15px] leading-relaxed text-foreground/90">{comment.content}</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 w-full mt-2">
-                  <Avatar className="h-8 w-8 shrink-0 hidden sm:block">
-                    <AvatarFallback className="bg-primary/10 text-xs text-primary">{user?.name?.charAt(0)}</AvatarFallback>
+                <div className="flex items-end gap-4 w-full mt-4 bg-black/5 dark:bg-white/5 p-3 rounded-2xl shadow-inner border border-white/10">
+                  <Avatar className="h-10 w-10 shrink-0 hidden sm:block ring-2 ring-white/20 mb-1">
+                    <AvatarFallback className="bg-primary/20 text-sm font-bold text-primary">{user?.name?.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 flex gap-2">
+                  <div className="flex-1 flex gap-3 relative">
                     <Input
                       placeholder="Add class comment..."
-                      className="rounded-full bg-background border-muted h-10"
+                      className="rounded-xl bg-background border-white/10 h-12 px-4 shadow-sm focus:ring-primary/30"
                       value={commentInputs[post.id] || ""}
                       onChange={(e) => setCommentInputs(prev => ({ ...prev, [post.id]: e.target.value }))}
                       onKeyDown={(e) => {
@@ -272,12 +277,11 @@ export function StreamTab({ classId }: { classId: string }) {
                     />
                     <Button
                       size="icon"
-                      variant="ghost"
-                      className="shrink-0 h-10 w-10 text-primary hover:text-primary hover:bg-primary/10 rounded-full"
+                      className="shrink-0 h-12 w-12 hover-elevate shadow-md shadow-primary/20 rounded-xl"
                       onClick={() => handleCreateComment(post.id)}
                       disabled={!(commentInputs[post.id]?.trim()) || createComment.isPending}
                     >
-                      <Send className="h-4 w-4" />
+                      <Send className="h-5 w-5 drop-shadow-sm text-white" />
                     </Button>
                   </div>
                 </div>

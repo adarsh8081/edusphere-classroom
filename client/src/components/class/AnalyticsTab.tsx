@@ -36,26 +36,32 @@ export function AnalyticsTab({ classId }: { classId: string }) {
     const COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f97316', '#10b981'];
 
     return (
-        <div className="space-y-8 max-w-5xl mx-auto pb-12 p-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <Card className="border-none shadow-md bg-primary/5">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                            <Users className="text-primary" size={24} />
+        <div className="space-y-8 max-w-5xl mx-auto pb-12 p-4 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card className="border-white/10 shadow-lg bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden relative group hover:-translate-y-1 transition-transform duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <CardContent className="pt-6 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-primary/20 flex items-center justify-center shadow-inner border border-primary/30 text-primary">
+                                <Users size={28} className="drop-shadow-sm" />
+                            </div>
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground opacity-70">Activity</p>
-                                <p className="text-2xl font-black">{engagement?.length || 0}</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground opacity-90 drop-shadow-sm">Activity</p>
+                                <p className="text-3xl font-black drop-shadow-sm text-foreground">{engagement?.length || 0}</p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-none shadow-md bg-blue-500/5">
-                    <CardContent className="pt-6">
-                        <div className="flex items-center gap-3">
-                            <BookOpen className="text-blue-500" size={24} />
+                <Card className="border-white/10 shadow-lg bg-black/5 dark:bg-white/5 backdrop-blur-md rounded-3xl overflow-hidden relative group hover:-translate-y-1 transition-transform duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                    <CardContent className="pt-6 relative z-10">
+                        <div className="flex items-center gap-4">
+                            <div className="w-14 h-14 rounded-2xl bg-blue-500/20 flex items-center justify-center shadow-inner border border-blue-500/30 text-blue-500">
+                                <BookOpen size={28} className="drop-shadow-sm" />
+                            </div>
                             <div>
-                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground opacity-70">Lessons</p>
-                                <p className="text-2xl font-black">{assignments?.length || 0}</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground opacity-90 drop-shadow-sm">Lessons</p>
+                                <p className="text-3xl font-black drop-shadow-sm text-foreground">{assignments?.length || 0}</p>
                             </div>
                         </div>
                     </CardContent>
@@ -64,14 +70,15 @@ export function AnalyticsTab({ classId }: { classId: string }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Engagement Chart */}
-                <Card className="shadow-xl bg-background/50 border-muted/20">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl font-black uppercase tracking-tight">
-                            <TrendingUp className="text-primary" />
+                <Card className="shadow-2xl glossy-panel border-white/20 rounded-3xl backdrop-blur-md overflow-hidden relative group">
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none opacity-50"></div>
+                    <CardHeader className="relative z-10 border-b border-white/10 bg-white/5">
+                        <CardTitle className="flex items-center gap-3 text-xl font-bold uppercase tracking-tight drop-shadow-sm">
+                            <TrendingUp className="text-primary drop-shadow-sm w-6 h-6" />
                             Engagement Trends
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="relative z-10 pt-6">
                         <div className="h-[300px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <LineChart data={chartData}>
@@ -101,14 +108,15 @@ export function AnalyticsTab({ classId }: { classId: string }) {
                 </Card>
 
                 {/* Assignment Stats */}
-                <Card className="shadow-xl bg-background/50 border-muted/20">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl font-black uppercase tracking-tight">
-                            <Award className="text-amber-500" />
+                <Card className="shadow-2xl glossy-panel border-white/20 rounded-3xl backdrop-blur-md overflow-hidden relative group">
+                    <div className="absolute inset-0 bg-gradient-to-bl from-amber-500/5 to-transparent pointer-events-none opacity-50"></div>
+                    <CardHeader className="relative z-10 border-b border-white/10 bg-white/5">
+                        <CardTitle className="flex items-center gap-3 text-xl font-bold uppercase tracking-tight drop-shadow-sm">
+                            <Award className="text-amber-500 drop-shadow-sm w-6 h-6" />
                             Submission Distribution
                         </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="relative z-10 pt-6">
                         <div className="h-[300px] w-full">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={assignments?.slice(0, 5)}>
@@ -140,11 +148,11 @@ export function AnalyticsTab({ classId }: { classId: string }) {
             </div>
 
             {/* Heatmap Placeholder */}
-            <Card className="shadow-xl bg-background/50 border-muted/20">
-                <CardHeader>
-                    <CardTitle className="text-lg font-black uppercase tracking-tight opacity-50">Engagement Heatmap</CardTitle>
+            <Card className="shadow-2xl glossy-panel border-white/20 rounded-3xl backdrop-blur-md overflow-hidden relative">
+                <CardHeader className="border-b border-white/10 bg-white/5">
+                    <CardTitle className="text-lg font-bold uppercase tracking-tight drop-shadow-sm opacity-80 pl-2">Engagement Heatmap</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6 relative z-10">
                     <div className="grid grid-cols-7 gap-1 md:gap-2">
                         {Array.from({ length: 35 }).map((_, i) => {
                             const opacity = Math.random() * 0.8 + 0.1;

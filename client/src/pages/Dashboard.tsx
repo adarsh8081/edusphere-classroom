@@ -21,7 +21,7 @@ export default function Dashboard() {
   const isTeacher = user?.role === 'teacher';
 
   return (
-    <div className="min-h-screen bg-muted/10">
+    <div className="min-h-screen relative z-10 pt-4">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -37,18 +37,18 @@ export default function Dashboard() {
         {isTeacher && <AtRiskWidget />}
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-48 bg-muted rounded-2xl animate-pulse"></div>
+              <div key={i} className="h-56 glossy-panel rounded-3xl animate-pulse"></div>
             ))}
           </div>
         ) : classes?.length === 0 ? (
-          <div className="bg-card border border-border border-dashed rounded-3xl p-12 text-center shadow-sm">
-            <div className="w-20 h-20 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6">
-              <GraduationCap className="w-10 h-10 text-primary/60" />
+          <div className="glossy-panel border-white/20 rounded-3xl p-12 text-center shadow-2xl backdrop-blur-xl max-w-2xl mx-auto">
+            <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[inset_0_2px_10px_rgba(255,255,255,0.2)] border border-primary/20 animate-pulse-glow">
+              <GraduationCap className="w-12 h-12 text-primary" />
             </div>
-            <h3 className="text-2xl font-semibold text-foreground mb-2">No classes yet</h3>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+            <h3 className="text-3xl font-display font-bold text-foreground mb-3 drop-shadow-sm">No classes yet</h3>
+            <p className="text-muted-foreground mb-8 text-lg">
               {isTeacher
                 ? "Create your first class to start posting announcements and assignments."
                 : "Join a class using the code provided by your teacher."}
@@ -56,26 +56,30 @@ export default function Dashboard() {
             {isTeacher ? <CreateClassDialog /> : <JoinClassDialog />}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {classes?.map((c: any) => (
               <Link key={c.id} href={`/class/${c.id}`}>
-                <div className="group relative bg-card rounded-2xl border border-border/60 shadow-sm hover:shadow-xl hover:border-primary/30 transition-all duration-300 overflow-hidden hover-elevate cursor-pointer h-full flex flex-col">
+                <div className="group relative matte-surface rounded-3xl border border-white/20 shadow-lg hover:shadow-[0_20px_40px_-15px_rgba(23,226,255,0.3)] transition-all duration-500 overflow-hidden cursor-pointer h-full flex flex-col hover:-translate-y-2">
                   {/* Card Banner */}
-                  <div className="h-24 bg-gradient-to-r from-primary to-violet-500 relative p-5">
-                    <h3 className="text-xl font-display font-bold text-white truncate pr-8 group-hover:underline decoration-white/50 underline-offset-4">{c.name}</h3>
-                    <p className="text-white/80 text-sm truncate">{c.subject || 'General'} • {c.grade || 'All Grades'}</p>
-                    <div className="absolute right-4 bottom-[-20px] w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md text-primary group-hover:scale-110 transition-transform">
-                      <ArrowRight className="w-5 h-5" />
+                  <div className="h-32 bg-gradient-to-br from-primary to-cyan-500 relative p-6 overflow-hidden">
+                    {/* Glassy Overlay effect in banner */}
+                    <div className="absolute inset-0 bg-white/10 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                    <h3 className="text-2xl font-display font-bold text-white truncate pr-10 relative z-10 drop-shadow-md">{c.name}</h3>
+                    <p className="text-white/90 text-sm truncate font-medium relative z-10 drop-shadow-sm mt-1">{c.subject || 'General'} • {c.grade || 'All Grades'}</p>
+
+                    <div className="absolute right-6 bottom-[-24px] w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl text-primary group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 z-20 border border-primary/10">
+                      <ArrowRight className="w-6 h-6" />
                     </div>
                   </div>
 
                   {/* Card Body */}
-                  <div className="p-5 pt-8 flex-1 flex flex-col">
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-4 flex-1">
+                  <div className="p-6 pt-10 flex-1 flex flex-col bg-card/60 backdrop-blur-md">
+                    <p className="text-sm text-foreground/80 line-clamp-2 mb-6 flex-1 font-medium">
                       {c.description || "No description provided."}
                     </p>
 
-                    <div className="flex items-center justify-between text-xs font-medium text-muted-foreground pt-4 border-t border-border">
+                    <div className="flex items-center justify-between text-xs font-bold text-muted-foreground pt-5 border-t border-border/50">
                       {isTeacher ? (
                         <>
                           <span className="flex items-center gap-1.5 text-emerald-600">
@@ -236,18 +240,17 @@ function AtRiskWidget() {
   if (isLoading || !classes || classes.length === 0 || allAtRisk.length === 0) return null;
 
   return (
-    <Card className="mb-10 border-amber-200 bg-amber-50/30 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between py-4 border-b border-amber-100 bg-amber-50/50">
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-amber-100 rounded-lg">
-            <AlertTriangle className="text-amber-600 w-5 h-5" />
+    <Card className="mb-10 border-amber-500/30 bg-amber-500/10 backdrop-blur-xl overflow-hidden shadow-[0_8px_32px_rgba(245,158,11,0.15)] hover:shadow-[0_8px_32px_rgba(245,158,11,0.25)] transition-all duration-500 rounded-3xl">
+      <CardHeader className="flex flex-row items-center justify-between py-5 border-b border-amber-500/20 bg-amber-500/10">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl shadow-lg border border-white/20">
+            <AlertTriangle className="text-white w-6 h-6 drop-shadow-md" />
           </div>
-          <CardTitle className="text-lg font-display text-amber-900">Priority: Students at Risk</CardTitle>
+          <CardTitle className="text-xl font-display font-bold text-amber-500 drop-shadow-sm">Priority: Students at Risk</CardTitle>
         </div>
         <Button
           variant="outline"
-          size="sm"
-          className="text-amber-700 border-amber-200 hover:bg-amber-100/50"
+          className="text-amber-500 border-amber-500/30 hover:bg-amber-500/20 hover:text-amber-400 font-bold rounded-xl"
           onClick={() => classes.map(c => runAssessment.mutate(c.id))}
           disabled={runAssessment.isPending}
         >
@@ -255,28 +258,28 @@ function AtRiskWidget() {
         </Button>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="divide-y divide-amber-100">
+        <div className="divide-y divide-amber-500/10">
           {allAtRisk.map((risk, i) => (
-            <div key={i} className="flex items-center justify-between p-4 hover:bg-amber-100/30 transition-colors">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-amber-200 shadow-sm font-bold text-amber-700">
+            <div key={i} className="flex items-center justify-between p-5 hover:bg-amber-500/10 transition-colors">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center border border-amber-300 shadow-inner font-extrabold text-amber-800 text-lg">
                   {risk.studentId.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <p className="font-medium text-amber-900">Student {risk.studentId.split('-')[0]}</p>
-                  <p className="text-xs text-amber-600 font-medium">Risk Score: {risk.riskScore}%</p>
+                  <p className="font-bold text-foreground text-lg">Student {risk.studentId.split('-')[0]}</p>
+                  <p className="text-sm text-amber-500 font-bold tracking-wide">Risk Score: {risk.riskScore}%</p>
                 </div>
               </div>
               <div className="flex gap-2">
                 {risk.riskFactors.slice(0, 2).map((factor: string, j: number) => (
-                  <Badge key={j} variant="secondary" className="bg-amber-100/50 text-[10px] text-amber-800 border-transparent">
+                  <Badge key={j} variant="secondary" className="bg-amber-500/20 text-xs font-bold text-amber-400 border-transparent px-3 py-1 rounded-lg backdrop-blur-sm">
                     {factor}
                   </Badge>
                 ))}
               </div>
               <Link href={`/class/${risk.classId}`}>
-                <Button variant="ghost" size="sm" className="text-amber-700 hover:bg-amber-200/40">
-                  View Class <ArrowRight className="ml-2 w-4 h-4" />
+                <Button variant="ghost" className="text-amber-500 hover:bg-amber-500/20 font-bold rounded-xl h-10">
+                  View Class <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
             </div>

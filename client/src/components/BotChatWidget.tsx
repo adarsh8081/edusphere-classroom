@@ -72,48 +72,51 @@ export function BotChatWidget({ classId }: { classId: string }) {
         return (
             <Button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 hover:scale-105 transition-transform"
+                className="fixed bottom-6 right-6 h-14 w-14 rounded-2xl shadow-lg shadow-primary/30 z-50 bg-gradient-to-br from-primary to-cyan-500 hover:from-primary/90 hover:to-cyan-500/90 hover:scale-105 hover:-translate-y-1 transition-all duration-300 border border-white/20 group"
             >
-                <MessageSquare className="h-6 w-6 text-primary-foreground" />
+                <div className="absolute inset-0 bg-white/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <MessageSquare className="h-6 w-6 text-white drop-shadow-md relative z-10" />
             </Button>
         );
     }
 
     return (
-        <Card className="fixed bottom-6 right-6 w-80 md:w-96 h-[32rem] shadow-xl z-50 flex flex-col border-primary/20 backdrop-blur-xl bg-background/95">
-            <CardHeader className="p-4 border-b flex flex-row items-center justify-between pb-3">
-                <div className="flex items-center gap-2">
-                    <Bot className="h-5 w-5 text-primary" />
-                    <CardTitle className="text-md font-medium">Classroom Assistant</CardTitle>
+        <Card className="fixed bottom-6 right-6 w-80 md:w-96 h-[32rem] shadow-2xl z-50 flex flex-col glossy-panel border-white/20 rounded-3xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300">
+            <CardHeader className="p-4 border-b border-white/10 flex flex-row items-center justify-between pb-3 bg-white/5 relative z-10">
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shadow-inner border border-primary/30">
+                        <Bot className="h-6 w-6 text-primary drop-shadow-sm" />
+                    </div>
+                    <CardTitle className="text-lg font-bold drop-shadow-sm">Classroom Assistant</CardTitle>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full hover:bg-white/10" onClick={() => setIsOpen(false)}>
                     <X className="h-4 w-4" />
                 </Button>
             </CardHeader>
 
-            <CardContent className="flex-1 p-0 flex flex-col overflow-hidden">
+            <CardContent className="flex-1 p-0 flex flex-col overflow-hidden relative z-10">
                 <ScrollArea className="flex-1 p-4" ref={scrollRef}>
                     <div className="space-y-4 pb-2">
                         {messages.map((msg, i) => (
                             <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] rounded-2xl p-3 text-sm flex flex-col ${msg.role === 'user'
-                                        ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                                        : 'bg-muted text-foreground rounded-tl-sm'
+                                <div className={`max-w-[85%] rounded-2xl p-4 text-[15px] flex flex-col shadow-md border ${msg.role === 'user'
+                                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-tr-sm border-white/20'
+                                    : 'bg-black/5 dark:bg-white/5 text-foreground rounded-tl-sm border-white/10 backdrop-blur-md'
                                     }`}>
-                                    <div className="flex items-center gap-2 mb-1 opacity-70 border-b border-primary/20 pb-1 w-full justify-between">
+                                    <div className="flex items-center gap-2 mb-2 opacity-80 border-b border-current/10 pb-1 w-full justify-between">
                                         <div className="flex items-center gap-2">
-                                            {msg.role === 'user' ? <User className="h-3 w-3" /> : <Bot className="h-3 w-3" />}
-                                            <span className="text-xs font-medium">{msg.role === 'user' ? 'You' : 'Assistant'}</span>
+                                            {msg.role === 'user' ? <User className="h-3.5 w-3.5" /> : <Bot className="h-3.5 w-3.5" />}
+                                            <span className="text-xs font-bold tracking-wide uppercase">{msg.role === 'user' ? 'You' : 'Assistant'}</span>
                                         </div>
                                     </div>
-                                    <div className="leading-relaxed whitespace-pre-wrap">
+                                    <div className="leading-relaxed whitespace-pre-wrap font-medium">
                                         {msg.content}
                                     </div>
                                     {msg.sources && msg.sources.length > 0 && (
-                                        <div className="mt-2 pt-2 border-t border-border/50 text-xs opacity-80 flex gap-1 flex-wrap w-full">
-                                            <span className="font-semibold block w-full">Sources:</span>
+                                        <div className="mt-3 pt-2 border-t border-current/10 text-xs opacity-90 flex gap-1.5 flex-wrap w-full">
+                                            <span className="font-bold block w-full text-[10px] uppercase tracking-wider mb-1">Sources:</span>
                                             {msg.sources.map((s, si) => (
-                                                <span key={si} className="bg-background/80 text-foreground px-1.5 py-0.5 rounded truncate max-w-[150px] shadow-sm">{typeof s === 'string' ? s.split('-')[0] : 'Doc'}</span>
+                                                <span key={si} className="bg-background/40 backdrop-blur-sm text-foreground px-2 py-1 rounded-md truncate max-w-[150px] shadow-inner font-medium border border-white/10">{typeof s === 'string' ? s.split('-')[0] : 'Doc'}</span>
                                             ))}
                                         </div>
                                     )}
@@ -122,34 +125,34 @@ export function BotChatWidget({ classId }: { classId: string }) {
                         ))}
                         {askMutation.isPending && (
                             <div className="flex justify-start">
-                                <div className="bg-muted rounded-2xl p-3 rounded-tl-sm flex items-center gap-2">
-                                    <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                                    <span className="text-sm text-muted-foreground">Thinking...</span>
+                                <div className="bg-black/5 dark:bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 rounded-tl-sm flex items-center gap-3 shadow-md">
+                                    <Loader2 className="h-5 w-5 animate-spin text-primary drop-shadow-sm" />
+                                    <span className="text-sm font-bold text-foreground/80">Thinking...</span>
                                 </div>
                             </div>
                         )}
                     </div>
                 </ScrollArea>
 
-                <div className="p-3 border-t bg-background/50">
+                <div className="p-4 border-t border-white/10 bg-black/10 dark:bg-black/20 backdrop-blur-lg">
                     <form
                         onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-                        className="flex gap-2"
+                        className="flex gap-3 relative"
                     >
                         <Input
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Ask a question..."
-                            className="flex-1 rounded-full bg-background"
+                            className="flex-1 rounded-xl bg-background/50 border-white/10 h-12 px-4 shadow-inner focus:ring-primary/40 text-base"
                             disabled={askMutation.isPending}
                         />
                         <Button
                             type="submit"
                             size="icon"
-                            className="rounded-full shrink-0"
+                            className="rounded-xl shrink-0 h-12 w-12 hover-elevate shadow-md shadow-primary/20"
                             disabled={!input.trim() || askMutation.isPending}
                         >
-                            <Send className="h-4 w-4" />
+                            <Send className="h-5 w-5 drop-shadow-sm text-white" />
                         </Button>
                     </form>
                 </div>
