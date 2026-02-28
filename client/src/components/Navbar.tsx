@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { ThemeToggle } from "./theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import {
@@ -83,6 +84,7 @@ export function Navbar() {
 
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="hidden sm:flex items-center gap-3">
+                      <ThemeToggle />
                       <Button
                         variant="ghost"
                         size="icon"

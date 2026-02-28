@@ -95,27 +95,31 @@ function Router() {
 // Hardcoded test override because headless drivers are unreliable
 const isTestEnv = typeof navigator !== 'undefined' && (navigator.webdriver === true || window.location.search.includes('disable3d'));
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 function App() {
   console.log("EduSphere: App init. isTestEnv:", isTestEnv);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        {/* Fixed 3D Background */}
-        {!isTestEnv && (
-          <ErrorBoundary fallback={<div className="fixed inset-0 z-[-1] bg-background" />}>
-            <Suspense fallback={<div className="fixed inset-0 z-[-1] bg-background" />}>
-              <Scene3D />
-            </Suspense>
-          </ErrorBoundary>
-        )}
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <TooltipProvider>
+          {/* Fixed 3D Background */}
+          {!isTestEnv && (
+            <ErrorBoundary fallback={<div className="fixed inset-0 z-[-1] bg-background" />}>
+              <Suspense fallback={<div className="fixed inset-0 z-[-1] bg-background" />}>
+                <Scene3D />
+              </Suspense>
+            </ErrorBoundary>
+          )}
 
-        {/* Main Content Overlay */}
-        <div className="relative min-h-screen">
-          <Toaster />
-          <Router />
-        </div>
-      </TooltipProvider>
+          {/* Main Content Overlay */}
+          <div className="relative min-h-screen">
+            <Toaster />
+            <Router />
+          </div>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }
