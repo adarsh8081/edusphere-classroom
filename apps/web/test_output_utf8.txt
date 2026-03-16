@@ -1,0 +1,28 @@
+﻿
+Running 1 test using 1 worker
+
+  Γ£ÿ  1 [chromium] ΓÇ║ e2e\auth.spec.ts:4:5 ΓÇ║ Authentication Flow ΓÇ║ User can register successfully (2.8s)
+
+
+  1) [chromium] ΓÇ║ e2e\auth.spec.ts:4:5 ΓÇ║ Authentication Flow ΓÇ║ User can register successfully ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:5173/login
+    Call log:
+    [2m  - navigating to "http://localhost:5173/login", waiting until "load"[22m
+
+
+      4 |     test('User can register successfully', async ({ page }) => {
+      5 |         // 1. Navigate to /login (AuthPage)
+    > 6 |         await page.goto('/login');
+        |                    ^
+      7 |
+      8 |         // 2. Click the "Sign Up" tab
+      9 |         await page.click('button[role="tab"]:has-text("Sign Up")');
+        at D:\EduSphere-Classroom\EduSphere-Classroom\Classroom\apps\web\e2e\auth.spec.ts:6:20
+
+    attachment #1: screenshot (image/png) ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    test-results\auth-Authentication-Flow-User-can-register-successfully-chromium\test-failed-1.png
+    ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+  1 failed
+    [chromium] ΓÇ║ e2e\auth.spec.ts:4:5 ΓÇ║ Authentication Flow ΓÇ║ User can register successfully ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
