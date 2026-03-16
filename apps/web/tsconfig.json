@@ -1,0 +1,51 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "./src/*"
+            ],
+            "@db/schemas": [
+                "../../database/schemas"
+            ],
+            "@modules/*": [
+                "../../services/api-server/src/modules/*"
+            ],
+            "@core/*": [
+                "../../services/api-server/src/modules/core/*"
+            ],
+            "@edusphere/types": [
+                "../../packages/types/src"
+            ],
+            "@edusphere/ui": [
+                "../../packages/ui/src/index.ts"
+            ],
+            "@edusphere/utils": [
+                "../../packages/utils/src"
+            ],
+            "@edusphere/api-client": [
+                "../../packages/api-client/src"
+            ],
+            "@edusphere/config": [
+                "../../packages/config/src"
+            ],
+            "@shared/*": [
+                "../../shared/*"
+            ],
+            "@assets/*": [
+                "../../attached_assets/*"
+            ]
+        },
+        "jsx": "react-jsx",
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true
+    },
+    "include": [
+        "src"
+    ]
+}

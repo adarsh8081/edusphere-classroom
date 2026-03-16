@@ -2,9 +2,17 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
-  content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./apps/web/index.html",
+    "./apps/web/src/**/*.{js,jsx,ts,tsx}",
+  ],
   theme: {
     extend: {
+      borderColor: {
+        // Required by `@apply border-border` in index.css
+        border: "hsl(var(--border))",
+        DEFAULT: "hsl(var(--border))",
+      },
       borderRadius: {
         lg: "1rem",     /* Larger, friendlier border radius */
         md: "0.75rem",

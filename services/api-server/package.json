@@ -1,0 +1,28 @@
+{
+    "name": "@edusphere/api-server",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "tsx src/index.ts",
+        "build": "tsx ../../script/build.ts",
+        "start": "node dist/index.cjs",
+        "typecheck": "tsc --noEmit",
+        "db:push": "drizzle-kit push",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
+        "test:security": "vitest run --config vitest.security.config.ts",
+        "test:perf": "tsx src/tests/performance/load.test.ts",
+        "test:all": "npm run test && npm run test:security",
+        "audit:security": "npm audit --audit-level=moderate"
+    },
+    "dependencies": {
+        "bullmq": "^5.70.4",
+        "ioredis": "^5.10.0"
+    },
+    "devDependencies": {
+        "@types/autocannon": "^7.12.7",
+        "autocannon": "^8.0.0"
+    }
+}

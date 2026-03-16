@@ -1,0 +1,6 @@
+[2026-03-10 16:03:06] POST /register | Status: 201 Created
+[2026-03-10 16:03:06] POST /login | Status: 200 OK
+[2026-03-10 16:03:06] GET /me | Status: 200 OK
+[2026-03-10 16:03:06] GET /users/profile | Status: 200 OK
+[2026-03-10 16:03:06] GET /classes | Status: 200 OK
+[2026-03-10 16:03:06] GET /wellbeing/stats | Status: Failed (Expected for Student): InternalServerError The remote server returned an error: (500) Internal Server Error.

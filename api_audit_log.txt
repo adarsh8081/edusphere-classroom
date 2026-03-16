@@ -1,0 +1,6 @@
+[2026-03-10 16:02:02] POST /auth/register | Status: Failed: The remote server returned an error: (500) Internal Server Error. | Body: 
+[2026-03-10 16:02:02] POST /auth/login | Status: Failed: The remote server returned an error: (500) Internal Server Error. | Body: 
+[2026-03-10 16:02:02] GET /auth/me | Status: Failed: The remote server returned an error: (500) Internal Server Error. | Body: 
+[2026-03-10 16:02:02] GET /users/profile | Status: Failed: The remote server returned an error: (401) Unauthorized. | Body: 
+[2026-03-10 16:02:02] GET /classes | Status: Failed: The remote server returned an error: (401) Unauthorized. | Body: 
+[2026-03-10 16:02:02] GET /wellbeing/stats | Status: Failed: InternalServerError The remote server returned an error: (500) Internal Server Error. | Body: 
