@@ -26,7 +26,7 @@ import { setupAuth } from "./modules/auth/auth.strategies";
 import v1Router from "./api/v1/router";
 import { seedBadges } from "./modules/gamification/gamification.service";
 
-const app = express();
+export const app = express();
 const httpServer = createServer(app);
 
 declare module "http" {
@@ -78,6 +78,14 @@ app.use((req, res, next) => {
 
 // ── Application Bootstrap ────────────────────────────────────────────────────
 
+// ── Application Initialization ───────────────────────────────────────────────
+
+// Setup authentication strategies
+setupAuth(app);
+
+// Mount all API routes
+app.use(v1Router);
+
 (async () => {
   // Connect Redis (graceful fallback if unavailable)
   await connectRedis();
@@ -87,9 +95,6 @@ app.use((req, res, next) => {
     console.error("[AI Worker] Failed to start:", err);
   });
 
-  // Setup authentication strategies
-  setupAuth(app);
-
   // Seed gamification badges
   seedBadges().catch(console.error);
 
@@ -97,9 +102,6 @@ app.use((req, res, next) => {
   app.get('/api/health-check', (_req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
-
-  // Mount all API routes
-  app.use(v1Router);
 
   // Setup real-time communication
   setupSocket(httpServer);

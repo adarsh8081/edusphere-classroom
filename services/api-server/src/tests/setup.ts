@@ -1,6 +1,8 @@
+import 'dotenv/config';
 import { vi } from 'vitest';
 
-// Mock the database for unit/integration testing
+// Mock the database for unit testing (commented out for integration tests)
+/*
 vi.mock('../../core/database/db', () => ({
     db: {
         select: vi.fn(),
@@ -10,6 +12,7 @@ vi.mock('../../core/database/db', () => ({
         execute: vi.fn()
     }
 }));
+*/
 
 // Mock the Redis setup for BullMQ / Socket.io
 vi.mock('../../core/redis/index', () => ({

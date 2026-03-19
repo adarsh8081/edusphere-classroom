@@ -1,4 +1,14 @@
+import fs from 'fs';
+import path from 'path';
 import { defineConfig } from 'vitest/config';
+
+// Load .env manually for Vitest workers
+const envPath = path.resolve(__dirname, '.env');
+const envContent = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+const getEnv = (key: string) => {
+    const match = envContent.match(new RegExp(`^${key}=(.*)$`, 'm'));
+    return match ? match[1].trim() : undefined;
+};
 
 export default defineConfig({
     test: {
@@ -17,10 +27,18 @@ export default defineConfig({
             reporter: ['text', 'json', 'html'],
         },
         env: {
-            DATABASE_URL: 'postgres://dummy:dummy@localhost:5432/dummy',
-            REDIS_URL: 'redis://localhost:6379',
-            GOOGLE_GEMINI_API_KEY: 'test_key',
-            SESSION_SECRET: 'test_secret'
+            DATABASE_URL: getEnv('DATABASE_URL') || '',
+            REDIS_URL: getEnv('REDIS_URL') || '',
+            GOOGLE_GEMINI_API_KEY: getEnv('GOOGLE_GEMINI_API_KEY') || 'test_key',
+            SESSION_SECRET: getEnv('SESSION_SECRET') || 'test_secret',
+            NODE_ENV: 'test'
+        },
+        alias: {
+            '@db': '../../database',
+            '@edusphere/database': '../../packages/database/src',
+            '@edusphere/types': '../../packages/types/src',
+            '@core': './src/core',
+            '@modules': './src/modules'
         }
     },
 });

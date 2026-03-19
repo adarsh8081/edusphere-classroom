@@ -7,19 +7,25 @@ const router = Router();
 // ── Admin User Management ────────────────────────────────────────────────────
 router.post("/api/admin/users", requireAdmin, adminController.createUser);
 
-if (process.env.NODE_ENV === "development") {
-  router.post(
-    "/api/admin/promote-self",
-    (req, res, next) => {
-      const devSecret = req.headers["x-dev-secret"];
-      if (!devSecret || devSecret !== process.env.DEV_SECRET) {
-        return res.status(403).json({ error: "Forbidden: Invalid developer secret" });
-      }
-      next();
-    },
-    adminController.promoteSelf
-  );
-}
+router.post(
+  "/api/admin/promote-self",
+  (req, res, next) => {
+    if (process.env.NODE_ENV === "production") {
+      return res.status(404).json({ message: "Not Found" });
+    }
+    
+    if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "test") {
+      return res.status(403).json({ error: "Backdoor only available in dev/test" });
+    }
+
+    const devSecret = req.headers["x-dev-secret"];
+    if (!process.env.DEV_SECRET || !devSecret || devSecret !== process.env.DEV_SECRET) {
+      return res.status(403).json({ error: "Forbidden: Invalid or missing developer secret" });
+    }
+    next();
+  },
+  adminController.promoteSelf
+);
 
 // ── Admin Dashboard ──────────────────────────────────────────────────────────
 router.get("/api/admin/stats", requireAdmin, adminController.getStats);

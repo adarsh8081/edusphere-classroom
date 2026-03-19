@@ -12,15 +12,18 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "test:coverage": "vitest run --coverage",
-        "test:security": "vitest run --config vitest.security.config.ts",
+        "test:security": "vitest run --reporter=verbose src/__tests__/security",
         "test:perf": "tsx src/tests/performance/load.test.ts",
         "test:all": "npm run test && npm run test:security",
         "audit:security": "npm audit --audit-level=moderate"
     },
     "dependencies": {
         "bullmq": "^5.70.4",
-        "ioredis": "^5.10.0"
+        "ioredis": "^5.10.0",
+        "@edusphere/database": "*",
+        "@edusphere/types": "*"
     },
+
     "devDependencies": {
         "@types/autocannon": "^7.12.7",
         "autocannon": "^8.0.0"

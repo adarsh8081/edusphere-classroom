@@ -33,7 +33,8 @@ export function setupAuth(app: Express) {
     new LocalStrategy({ usernameField: "email" }, async (email, password, done) => {
       try {
         const user = await authRepository.getUserByEmail(email);
-        if (!user || !user.password || !(await authService.comparePasswords(password, user.password))) {
+        const match = user && user.password && (await authService.comparePasswords(password, user.password));
+        if (!user || !match) {
           return done(null, false, { message: "Invalid email or password" });
         }
         return done(null, user);
