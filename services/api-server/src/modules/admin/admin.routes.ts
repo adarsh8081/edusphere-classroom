@@ -6,7 +6,20 @@ const router = Router();
 
 // ── Admin User Management ────────────────────────────────────────────────────
 router.post("/api/admin/users", requireAdmin, adminController.createUser);
-router.post("/api/admin/promote-self", adminController.promoteSelf);
+
+if (process.env.NODE_ENV === "development") {
+  router.post(
+    "/api/admin/promote-self",
+    (req, res, next) => {
+      const devSecret = req.headers["x-dev-secret"];
+      if (!devSecret || devSecret !== process.env.DEV_SECRET) {
+        return res.status(403).json({ error: "Forbidden: Invalid developer secret" });
+      }
+      next();
+    },
+    adminController.promoteSelf
+  );
+}
 
 // ── Admin Dashboard ──────────────────────────────────────────────────────────
 router.get("/api/admin/stats", requireAdmin, adminController.getStats);

@@ -25,6 +25,9 @@ export class AssignmentsController {
     }
 
     async createAssignment(req: Request, res: Response, next: NextFunction) {
+        if (!["teacher", "super_admin"].includes((req.user as any).role)) {
+            return res.status(403).json({ error: "Insufficient permissions" });
+        }
         try {
             const user = req.user!;
             const input = req.body; // Validation handled by middleware
@@ -77,6 +80,9 @@ export class AssignmentsController {
     }
 
     async gradeSubmission(req: Request, res: Response, next: NextFunction) {
+        if (!["teacher", "super_admin"].includes((req.user as any).role)) {
+            return res.status(403).json({ error: "Insufficient permissions" });
+        }
         try {
             const { grade, feedback } = req.body;
             const sub = await assignmentsRepository.gradeSubmission(req.params.submissionId as string, String(grade), feedback);
@@ -91,6 +97,9 @@ export class AssignmentsController {
     }
 
     async checkPlagiarism(req: Request, res: Response, next: NextFunction) {
+        if (!["teacher", "super_admin"].includes((req.user as any).role)) {
+            return res.status(403).json({ error: "Insufficient permissions" });
+        }
         try {
             const submission = await assignmentsRepository.getSubmission(req.params.submissionId as string);
             if (!submission) return res.status(404).json({ message: "Submission not found" });
@@ -114,6 +123,9 @@ export class AssignmentsController {
     }
 
     async updateReview(req: Request, res: Response, next: NextFunction) {
+        if (!["teacher", "super_admin"].includes((req.user as any).role)) {
+            return res.status(403).json({ error: "Insufficient permissions" });
+        }
         try {
             const { score, isFlagged } = req.body;
             const updated = await assignmentsRepository.updateReviewModeration(req.params.id as string, score, isFlagged, req.user!.id);
@@ -125,7 +137,7 @@ export class AssignmentsController {
 
     async submitPeerReview(req: Request, res: Response, next: NextFunction) {
         try {
-            const { submissionId } = req.params;
+            const submissionId = req.params.submissionId as string;
             const { content, rating, feedback } = req.body;
             const user = req.user as any;
 
@@ -156,7 +168,7 @@ export class AssignmentsController {
             const review = await assignmentsRepository.createPeerReview({
                 submissionId,
                 reviewerId: user.id,
-                assignmentId: submission.assignmentId,
+                assignmentId: submission.assignmentId as string,
                 content: content || feedback,
                 score: rating,
             });
@@ -178,6 +190,9 @@ export class AssignmentsController {
     }
 
     async markAttendance(req: Request, res: Response, next: NextFunction) {
+        if (!["teacher", "super_admin"].includes((req.user as any).role)) {
+            return res.status(403).json({ error: "Insufficient permissions" });
+        }
         try {
             const user = req.user!;
             const { date, records } = req.body;

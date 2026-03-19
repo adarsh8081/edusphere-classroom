@@ -45,12 +45,13 @@ export class AuthService {
 
         const hashedPassword = await this.hashPassword(data.password);
 
-        // Only include fields that exist in the users table
+        // Discard role from input and hardcode to student for security
+        const { role, ...safeData } = data;
         const userData = {
-            name: data.name,
-            email: data.email,
+            name: safeData.name,
+            email: safeData.email,
             password: hashedPassword,
-            role: data.role || "student"
+            role: "student"
         };
 
         return await authRepository.createUser(userData as any);
